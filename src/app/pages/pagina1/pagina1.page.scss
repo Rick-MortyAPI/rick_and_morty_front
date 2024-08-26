@@ -1,0 +1,17 @@
+.contain-var{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.contain-var ion-searchbar{
+    width: 86%;
+}
+
+.contain-var ion-button{
+    width: 10%;
+    height: 20%;
+    max-width: 35px;
+    max-height: 40px;
+    margin: auto;
+}

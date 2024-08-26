@@ -1,0 +1,43 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Search</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Search</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="contain-var">
+    <ion-searchbar 
+      [(ngModel)]="searchTerm"
+      (ionInput)="onSearch()"
+      placeholder="Search for a character">
+    </ion-searchbar> 
+  
+    <ion-button shape="round" (click)="onSearch()">
+      <ion-icon slot="icon-only" name="search"></ion-icon>
+    </ion-button>
+  </div>
+
+  <ion-list>
+    <ion-item *ngFor="let character of characters">
+      <ion-thumbnail slot="start">
+        <img [src]="character.image" />
+      </ion-thumbnail>
+      <ion-label>{{ character.name }}</ion-label>
+      
+      <ion-button shape="round" class="boton" (click)="openCharacterModal(character)">
+        <ion-icon slot="icon-only" name="eye"></ion-icon>
+      </ion-button>
+
+      <ion-button shape="round" class="boton" id="open-toast" (click)="toggleFavorite(character)">
+        <ion-icon slot="icon-only" [name]="isFavorite(character) ? 'star' : 'star-outline'"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
