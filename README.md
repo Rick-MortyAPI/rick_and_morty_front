@@ -29,4 +29,38 @@ Primero, clona el repositorio desde GitHub a tu máquina local:
 
 ```bash
 git clone https://github.com/tu-usuario/rick-and-morty-app.git
+```
+### 2. Navegar al directorio del proyecto
+
+Primero, clona el repositorio desde GitHub a tu máquina local:
+
+```bash
+cd rick-and-morty-app
+```
+
+### 3. Instalar las dependencias
+
+Instala todas las dependencias necesarias con el siguiente comando:
+
+```bash
+npm install
+```
+### 4. Ejecutar la aplicación
+
+Finalmente, ejecuta la aplicación con Ionic:
+
+```bash
+ionic serve
+```
+Este comando abrirá la aplicación en tu navegador por defecto, donde podrás probar todas las funcionalidades.
+
+## Uso
+
+1. Buscar Personajes: Usa la barra de búsqueda para encontrar personajes por nombre. Los resultados se mostrarán en la lista.
+2. Ver Detalles: Haz clic en el icono de ojo para abrir un modal con los detalles del personaje.
+3. Favoritos: Haz clic en la estrella para agregar o quitar un personaje de la lista de favoritos. Puedes ver tus favoritos en la sección correspondiente.
+
+## Contribuciones
+Las contribuciones son bienvenidas. Si deseas agregar nuevas funcionalidades, corregir errores o mejorar el código, siéntete libre de abrir un pull request.
+
 
