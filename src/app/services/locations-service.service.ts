@@ -1,13 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationsServiceService {
 
-  private apiUrlLocations: string = 'https://rickandmortyapi.com/api/location';
+  private apiUrlLocations: string = `${ environment.URL_RK }/location`;
 
   constructor( private http: HttpClient ) { }
 
