@@ -11,68 +11,9 @@ import { FavoritesServiceService } from 'src/app/services/favorites-service.serv
 })
 export class Pagina1Page implements OnInit {
 
-  searchTerm: string = '';
-  characters: any[] = [];
-  toastMessage: string = '';
-  isToastOpen: boolean = false;
-
-  constructor( 
-    private charcaterService: CharactersServiceService,
-    private modalController: ModalController,
-    private favoritesService: FavoritesServiceService
-   ) {}
+  constructor() {}
 
   ngOnInit() {
-  }
-
-  onSearch() {
-    if (this.searchTerm.trim().length === 0) {
-      this.characters = [];
-      return;
-    }
-    
-    this.charcaterService.searchCharacters(this.searchTerm).subscribe(
-      (data: any) => {
-        this.characters = data.results;
-      },
-      (error) => {
-        console.error('Error fetching characters:', error);
-        this.toastMessage = `Error fetching characters: '${error.error.error}'`;
-        this.characters = [];
-      }
-    );
-  }
-
-  async openCharacterModal(character: any) {
-    const modal = await this.modalController.create({
-      component: PersonajeModalComponent,
-      componentProps: {
-        character: character
-      }
-    });
-    return await modal.present();
-  }
-
-  isFavorite(character: any): boolean {
-    return this.favoritesService.isFavorite(character);
-  }
-
-  toggleFavorite(character: any) {
-
-    if (this.isFavorite(character)) {
-      this.favoritesService.removeFavorite(character);
-      this.toastMessage = `${character.name} removed from favorites`;
-    } else {
-      this.favoritesService.addFavorite(character);
-      this.toastMessage = `${character.name} added to favorites`;
-    }
-
-    this.isToastOpen = true;
-
-    setTimeout(() => {
-      this.isToastOpen = false;
-    }, 3000);
-
   }
 
 }

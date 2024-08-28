@@ -5,6 +5,8 @@ import { LugaresComponent } from './lugares/lugares.component';
 import { IonicModule } from '@ionic/angular';
 import { FavoritesComponent } from './favorites/favorites.component';
 import { PersonajeModalComponent } from './personaje-modal/personaje-modal.component';
+import { SearchComponent } from './search/search.component';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -12,17 +14,20 @@ import { PersonajeModalComponent } from './personaje-modal/personaje-modal.compo
     PersonajesComponent,
     LugaresComponent,
     FavoritesComponent,
-    PersonajeModalComponent
+    PersonajeModalComponent,
+    SearchComponent
   ],
   imports: [
     CommonModule,
     IonicModule,
+    FormsModule
   ],
   exports: [
     PersonajesComponent,
     LugaresComponent,
     FavoritesComponent,
-    PersonajeModalComponent
+    PersonajeModalComponent,
+    SearchComponent
   ]
 })
 export class ComponentsModule { }
