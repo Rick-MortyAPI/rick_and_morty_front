@@ -20,6 +20,10 @@ export class CharactersServiceService {
     );
   }
 
+  getCharacterByUrl(url: string): Observable<any> {
+    return this.http.get<any>(url); // Devolver el Observable de la respuesta HTTP
+  }
+
   searchCharacters(name: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrlCharacters}/?name=${name}`);
   }

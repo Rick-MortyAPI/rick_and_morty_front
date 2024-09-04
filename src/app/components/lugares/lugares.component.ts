@@ -1,54 +1,68 @@
 import { Component, OnInit } from '@angular/core';
-import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { LocationsServiceService } from '../../services/locations-service.service';
+import { CharactersServiceService } from 'src/app/services/characters-service.service';
+import { InfiniteScrollCustomEvent } from '@ionic/angular';
 
 @Component({
   selector: 'app-lugares',
   templateUrl: './lugares.component.html',
   styleUrls: ['./lugares.component.scss'],
 })
-export class LugaresComponent  implements OnInit {
+export class LugaresComponent implements OnInit {
 
-  locations: any[] = [];
+  lugaresList: any[] = []; // Lista de lugares
+  residentesList: { [key: string]: any[] } = {}; // Diccionario para los residentes por lugar
+  loading: boolean = true; // Estado de carga
   currentPage: number = 1;
-  isLoading: boolean = false;
 
-  constructor( private locationsServiceService: LocationsServiceService ) { }
+  constructor(
+    private _locationService: LocationsServiceService,
+    private _rickyMortyService: CharactersServiceService
+  ) {}
 
   ngOnInit() {
-    this.loadLocations();
+    this.getAllLocations(); // Obtener todas las localizaciones al iniciar el componente
   }
 
-  getRandomImage(): string {
-    const randomIndex = Math.floor(Math.random() * 17) + 1;
-    return `../../../assets/Images//image${randomIndex}.png`;
-  }
-
-  loadLocations(event?: InfiniteScrollCustomEvent) {
-    if (this.isLoading) return;
-    this.isLoading = true;
-
-    this.locationsServiceService.getLocationsByPage(this.currentPage).subscribe(
-      (data) => {
-        this.locations = [...this.locations, ...data];
-        this.currentPage++;
-        this.isLoading = false;
-        if (event) {
-          event.target.complete();
-        }
+  // Obtener todas las localizaciones
+  getAllLocations() {
+    this._locationService.getLocationsByPage(this.currentPage).subscribe(
+      data => {
+        this.lugaresList = [...this.lugaresList, ...data]; // Añadir las localizaciones nuevas
+        this.lugaresList.forEach(lugar => {
+          this.obtenerResidentes(lugar);
+        });
+        this.loading = false;
       },
-      (error) => {
-        console.error('Error fetching characters:', error);
-        this.isLoading = false;
-        if (event) {
-          event.target.complete();
-        }
+      error => {
+        console.error('Error fetching locations:', error);
+        this.loading = false;
       }
     );
   }
 
-  onIonInfinite(event: InfiniteScrollCustomEvent) {
-    this.loadLocations(event);
+  // Obtener los residentes de cada lugar
+  obtenerResidentes(lugar: any) {
+    const residents = lugar.residents;
+    this.residentesList[lugar.id] = []; // Inicializar la lista de residentes para el lugar
+
+    residents.forEach((url: string) => {
+      this._rickyMortyService.getCharacterByUrl(url)
+        .subscribe(
+          data => {
+            this.residentesList[lugar.id].push(data); // Añadir el residente a la lista
+          },
+          error => {
+            console.error(`Error fetching resident from ${url}:`, error);
+          }
+        );
+    });
   }
 
+  onIonInfinite(event: InfiniteScrollCustomEvent) {
+    this.currentPage++; // Incrementar el número de página para la siguiente carga
+    this.getAllLocations();
+    event.target.complete(); // Marcar el infinite scroll como completado
+  }
+  
 }

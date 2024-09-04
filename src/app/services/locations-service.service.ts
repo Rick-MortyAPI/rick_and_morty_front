@@ -12,7 +12,7 @@ export class LocationsServiceService {
 
   constructor( private http: HttpClient ) { }
 
-  getLocationsByPage(page: number): Observable<any> {
+  getLocationsByPage(page: number) {
     return this.http.get<any>(`${this.apiUrlLocations}?page=${page}`).pipe(
       map(response => response.results)
     );
