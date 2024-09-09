@@ -1,13 +1,11 @@
 <ion-card>
   <ion-card-header>
-    <ion-card-title></ion-card-title>
-    <ion-card-subtitle>Characters Selected</ion-card-subtitle>
+    <ion-card-subtitle>Personajes seleccionados</ion-card-subtitle>
   </ion-card-header>
 
   <ion-card-content>
-    
-    <ion-list class="card">
 
+    <ion-list class="card" *ngIf="characters.length > 0; else noCharacters">
       <ion-item class="items" *ngFor="let character of characters">
         
         <ion-thumbnail slot="start">
@@ -22,14 +20,15 @@
         <ion-button shape="round" class="boton" id="open-toast" (click)="toggleFavorite(character)">
           <ion-icon slot="icon-only" [name]="isFavorite(character) ? 'star' : 'star-outline'"></ion-icon>
         </ion-button>
-        
 
       </ion-item>
 
       <ion-toast id="toast" [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
-
     </ion-list>
 
-  </ion-card-content>
+    <ng-template #noCharacters>
+      <p>No tienes ningun personaje seleccionado. Por favor, añade personajes a tu lista de favoritos!</p>
+    </ng-template>
 
+  </ion-card-content>
 </ion-card>

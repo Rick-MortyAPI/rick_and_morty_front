@@ -11,35 +11,57 @@
       <ion-card *ngFor="let lugar of lugaresList; let i = index">
 
         <ion-card-header>
-          <ion-card-title>{{ lugar.name }}</ion-card-title>
+          <ion-card-title><ion-icon aria-hidden="true" name="pin"></ion-icon>{{ lugar.name }}</ion-card-title>
           <ion-card-subtitle>{{ lugar.dimension !== 'unknown' ? lugar.dimension : lugar.type }}</ion-card-subtitle>
         </ion-card-header>
 
-        <ion-card-content>
+        <ion-card-content> 
+
           <ion-accordion-group>
+
             <ion-accordion>
+
               <ion-item slot="header">
                 <ion-label>Residentes ({{ residentesList[lugar.id].length }})</ion-label>
               </ion-item>
+
               <ion-list slot="content">
+
                 <ion-item *ngFor="let resident of residentesList[lugar.id]">
+
                   <ion-avatar slot="start">
                     <img [src]="resident.image" />
                   </ion-avatar>
+
                   <ion-label>
                     <h2>{{ resident.name }}</h2>
                     <p>{{ resident.species }} - {{ resident.status }}</p>
                   </ion-label>
+
+                  <ion-button shape="round" class="boton" (click)="openCharacterModal(resident)">
+                    <ion-icon slot="icon-only" name="eye"></ion-icon>
+                  </ion-button>
+          
+                  <ion-button shape="round" class="boton" id="open-toast" (click)="toggleFavorite(resident)">
+                    <ion-icon slot="icon-only" [name]="isFavorite(resident) ? 'star' : 'star-outline'"></ion-icon>
+                  </ion-button>
+
                 </ion-item>
+
               </ion-list>
+
             </ion-accordion>
+
           </ion-accordion-group>
+
         </ion-card-content>
+
       </ion-card>
+
+      <ion-toast id="toast" [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
 
     </ion-list>
 
-    <!-- Mensaje si no hay lugares después de que termina la carga -->
     <ion-item *ngIf="!loading && lugaresList.length === 0">
       <ion-label color="medium">
         No hay lugares disponibles.
