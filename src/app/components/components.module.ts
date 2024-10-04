@@ -7,6 +7,7 @@ import { FavoritesComponent } from './favorites/favorites.component';
 import { PersonajeModalComponent } from './personaje-modal/personaje-modal.component';
 import { SearchComponent } from './search/search.component';
 import { FormsModule } from '@angular/forms';
+import { ScanCodeComponent } from './scan-code/scan-code.component';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { FormsModule } from '@angular/forms';
     LugaresComponent,
     FavoritesComponent,
     PersonajeModalComponent,
-    SearchComponent
+    SearchComponent,
+    ScanCodeComponent,
   ],
   imports: [
     CommonModule,
@@ -27,7 +29,8 @@ import { FormsModule } from '@angular/forms';
     LugaresComponent,
     FavoritesComponent,
     PersonajeModalComponent,
-    SearchComponent
+    SearchComponent,
+    ScanCodeComponent,
   ]
 })
 export class ComponentsModule { }

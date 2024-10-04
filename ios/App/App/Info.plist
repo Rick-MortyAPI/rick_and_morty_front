@@ -5,7 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>MyApplicationTabs</string>
+	<string>Rick&Morty</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app enables the scanning of various barcodes.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Necesitamos acceder a tu ubicación para añadirla al código QR escaneado.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Esta app utiliza tu ubicación para mejorar la experiencia del usuario.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

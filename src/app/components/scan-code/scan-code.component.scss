@@ -1,0 +1,13 @@
+.container{
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.fixed-scan-button {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 100;
+}
