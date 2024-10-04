@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Barcode, BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import { AlertController } from '@ionic/angular';
 import { FoundServiceService } from 'src/app/services/found-service.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-scan-code',
@@ -16,6 +17,7 @@ export class ScanCodeComponent implements OnInit {
   constructor(
     private alertController: AlertController,
     private foundService: FoundServiceService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -34,8 +36,22 @@ export class ScanCodeComponent implements OnInit {
       this.presentAlert();
       return;
     }
-    const { barcodes } = await BarcodeScanner.scan();
-    this.barcodes.push(...barcodes);
+    
+    try {
+      const { barcodes } = await BarcodeScanner.scan();
+      if (barcodes.length > 0) {
+        const qrCodeData = barcodes[0].rawValue;
+        this.fetchCharacterData(qrCodeData);
+      }
+    } catch (error) {
+      console.error("Error scanning:", error);
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'No se pudo abrir la cámara.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+    }
   }
 
   async requestPermissions(): Promise<boolean> {
@@ -51,5 +67,28 @@ export class ScanCodeComponent implements OnInit {
     });
     await alert.present();
   }
-  
+
+  // Método para obtener los datos del personaje desde el endpoint
+  private fetchCharacterData(endpoint: string): void {
+    this.http.get(endpoint).subscribe(
+      (character: any) => {
+        // Guardamos el personaje en el localStorage
+        this.foundService.addFound(character);
+        const alert = this.alertController.create({
+          header: 'Character Found',
+          message: `Se encontró al personaje: ${character.name}`,
+          buttons: ['OK'],
+        });
+        alert.then(a => a.present());
+      },
+      (error) => {
+        console.error("Error fetching character data:", error);
+        this.alertController.create({
+          header: 'Error',
+          message: 'No se pudo obtener los datos del personaje.',
+          buttons: ['OK'],
+        }).then(a => a.present());
+      }
+    );
+  }
 }
