@@ -3,6 +3,7 @@ import { Barcode, BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import { AlertController } from '@ionic/angular';
 import { FoundServiceService } from 'src/app/services/found-service.service';
 import { HttpClient } from '@angular/common/http';
+import { Geolocation } from '@capacitor/geolocation'; // Asegúrate de importar Geolocation
 
 @Component({
   selector: 'app-scan-code',
@@ -13,6 +14,7 @@ export class ScanCodeComponent implements OnInit {
   characters: any[] = [];
   isSupported = false;
   barcodes: Barcode[] = [];
+  location: { latitude: number; longitude: number } | undefined; // Definimos la propiedad location
 
   constructor(
     private alertController: AlertController,
@@ -71,15 +73,33 @@ export class ScanCodeComponent implements OnInit {
   // Método para obtener los datos del personaje desde el endpoint
   private fetchCharacterData(endpoint: string): void {
     this.http.get(endpoint).subscribe(
-      (character: any) => {
-        // Guardamos el personaje en el localStorage
+      async (character: any) => {
+        // Verificamos si el personaje ya está almacenado
+        if (this.foundService.isFound(character.id)) {
+          this.alertController.create({
+            header: 'Personaje ya existe',
+            message: 'El personaje ya está en tu lista.',
+            buttons: ['OK'],
+          }).then(alert => alert.present());
+          return; // Salimos del método si el personaje ya existe
+        }
+
+        // Obtenemos la ubicación del personaje
+        await this.getLocation();
+
+        // Asignamos la ubicación al personaje
+        character.ubicacion = {
+          lat: this.location?.latitude,
+          lng: this.location?.longitude
+        };
+
+        // Si el personaje no existe, lo guardamos
         this.foundService.addFound(character);
-        const alert = this.alertController.create({
+        this.alertController.create({
           header: 'Character Found',
           message: `Se encontró al personaje: ${character.name}`,
           buttons: ['OK'],
-        });
-        alert.then(a => a.present());
+        }).then(alert => alert.present());
       },
       (error) => {
         console.error("Error fetching character data:", error);
@@ -87,8 +107,21 @@ export class ScanCodeComponent implements OnInit {
           header: 'Error',
           message: 'No se pudo obtener los datos del personaje.',
           buttons: ['OK'],
-        }).then(a => a.present());
+        }).then(alert => alert.present());
       }
     );
+  }
+
+  private async getLocation(): Promise<void> {
+    try {
+      const position = await Geolocation.getCurrentPosition(); 
+      this.location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      };
+    } catch (error) {
+      console.error("Error getting location:", error);
+      this.location = undefined;
+    }
   }
 }

@@ -2,7 +2,7 @@
 
   <ion-card *ngFor="let character of characters">
     
-    <img alt="Silhouette of mountains" src="https://ionicframework.com/docs/img/demos/card-media.png" />
+    <img alt="Silhouette of mountains" src="{{ character.image }}" />
 
     <ion-card-header>
       <ion-card-title>{{ character.name }}</ion-card-title>
@@ -10,7 +10,9 @@
     </ion-card-header>
 
     <ion-card-content>
-      <p>Ubicación del Personaje: Pepe</p>
+      <p>Ubicación del Personaje</p>
+      <p>Longitud: {{ character.ubicacion.lng }}</p>
+      <p>Latitud: {{ character.ubicacion.lat }}</p>
     </ion-card-content>
   </ion-card>
 
