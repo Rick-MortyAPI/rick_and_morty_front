@@ -17,7 +17,7 @@ export class ScanCodeComponent implements OnInit {
   constructor(
     private alertController: AlertController,
     private foundService: FoundServiceService,
-    private http: HttpClient
+    private http: HttpClient // Importamos HttpClient
   ) {}
 
   ngOnInit() {
@@ -40,6 +40,7 @@ export class ScanCodeComponent implements OnInit {
     try {
       const { barcodes } = await BarcodeScanner.scan();
       if (barcodes.length > 0) {
+        // Suponiendo que el código QR contiene la URL del endpoint
         const qrCodeData = barcodes[0].rawValue;
         this.fetchCharacterData(qrCodeData);
       }
