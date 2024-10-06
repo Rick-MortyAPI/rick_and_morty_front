@@ -1,6 +1,6 @@
 <div class="container">
 
-  <ion-card *ngFor="let character of characters">
+  <ion-card (click)="openCharacterModal(character)" *ngFor="let character of characters">
     
     <img alt="Silhouette of mountains" src="{{ character.image }}" />
 

@@ -31,13 +31,13 @@ export class FoundServiceService {
   }
 
   removeFound(character: any) {
-    const currentFound = this.getFound().filter(fav => fav.id !== character.id);
+    const currentFound = this.getFound().filter(found => found.id !== character.id);
     this.updateFound(currentFound);
   }
 
-  isFound(character: any): boolean {
-    return this.getFound().some(fav => fav.id === character.id);
-  }
+  isFound(characterId: any): boolean {
+    return this.getFound().some(found => found.id.toString() === characterId.toString());
+  }  
 
   private updateFound(found: any[]) {
     localStorage.setItem('found', JSON.stringify(found));

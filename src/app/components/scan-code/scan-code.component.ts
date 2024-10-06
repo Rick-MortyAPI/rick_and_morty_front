@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Barcode, BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { FoundServiceService } from 'src/app/services/found-service.service';
 import { HttpClient } from '@angular/common/http';
-import { Geolocation } from '@capacitor/geolocation'; // Asegúrate de importar Geolocation
+import { Geolocation } from '@capacitor/geolocation';
+import { PersonajeModalComponent } from '../personaje-modal/personaje-modal.component';
+
 
 @Component({
   selector: 'app-scan-code',
@@ -14,11 +16,12 @@ export class ScanCodeComponent implements OnInit {
   characters: any[] = [];
   isSupported = false;
   barcodes: Barcode[] = [];
-  location: { latitude: number; longitude: number } | undefined; // Definimos la propiedad location
+  location: { latitude: number; longitude: number } | undefined;
 
   constructor(
     private alertController: AlertController,
     private foundService: FoundServiceService,
+    private modalController: ModalController,
     private http: HttpClient
   ) {}
 
@@ -70,36 +73,39 @@ export class ScanCodeComponent implements OnInit {
     await alert.present();
   }
 
-  // Método para obtener los datos del personaje desde el endpoint
+
   private fetchCharacterData(endpoint: string): void {
+
     this.http.get(endpoint).subscribe(
       async (character: any) => {
-        // Verificamos si el personaje ya está almacenado
+
         if (this.foundService.isFound(character.id)) {
-          this.alertController.create({
-            header: 'Personaje ya existe',
+          const alert = await this.alertController.create({
+            header: 'Personaje ya encontrado',
             message: 'El personaje ya está en tu lista.',
             buttons: ['OK'],
-          }).then(alert => alert.present());
-          return; // Salimos del método si el personaje ya existe
+          });
+          await alert.present();
+          return;
         }
 
-        // Obtenemos la ubicación del personaje
         await this.getLocation();
 
-        // Asignamos la ubicación al personaje
         character.ubicacion = {
           lat: this.location?.latitude,
           lng: this.location?.longitude
         };
 
-        // Si el personaje no existe, lo guardamos
         this.foundService.addFound(character);
-        this.alertController.create({
-          header: 'Character Found',
+
+        const successAlert = await this.alertController.create({
+          header: 'Personaje Encontrado',
           message: `Se encontró al personaje: ${character.name}`,
           buttons: ['OK'],
-        }).then(alert => alert.present());
+        });
+
+        await successAlert.present();
+
       },
       (error) => {
         console.error("Error fetching character data:", error);
@@ -123,5 +129,15 @@ export class ScanCodeComponent implements OnInit {
       console.error("Error getting location:", error);
       this.location = undefined;
     }
+  }
+
+  async openCharacterModal(character: any) {
+    const modal = await this.modalController.create({
+      component: PersonajeModalComponent,
+      componentProps: {
+        character: character
+      }
+    });
+    return await modal.present();
   }
 }
