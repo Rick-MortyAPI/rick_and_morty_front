@@ -3,6 +3,7 @@
     height: auto;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .fixed-scan-button {
@@ -12,8 +13,11 @@
     z-index: 100;
 }
 
-#map {
-    height: 300px; // Asegúrate de que esto coincida con la altura en tu HTML
-    width: 100%;
+ion-card{
+    max-width: 400px;
 }
-  
+
+img{
+    width: 100%;
+    height: auto;
+}

@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Barcode, BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { FoundServiceService } from 'src/app/services/found-service.service';
 import { HttpClient } from '@angular/common/http';
+import { Geolocation } from '@capacitor/geolocation';
+import { PersonajeModalComponent } from '../personaje-modal/personaje-modal.component';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 
 @Component({
   selector: 'app-scan-code',
@@ -13,21 +17,37 @@ export class ScanCodeComponent implements OnInit {
   characters: any[] = [];
   isSupported = false;
   barcodes: Barcode[] = [];
+  location: { latitude: number; longitude: number } | undefined;
+  mapUrl: SafeResourceUrl | undefined;
 
   constructor(
     private alertController: AlertController,
     private foundService: FoundServiceService,
-    private http: HttpClient // Importamos HttpClient
+    private modalController: ModalController,
+    private http: HttpClient,
+    private sanitizer: DomSanitizer
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
+    
     BarcodeScanner.isSupported().then((result) => {
       this.isSupported = result.supported;
     });
-
+    
     this.foundService.found$.subscribe(found => {
       this.characters = found;
     });
+    
+  }
+
+  getMapUrl(character: any): SafeResourceUrl {
+    const lng = character.ubicacion.lng;
+    const lat = character.ubicacion.lat;
+    const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+    
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   async scan(): Promise<void> {
@@ -69,18 +89,39 @@ export class ScanCodeComponent implements OnInit {
     await alert.present();
   }
 
-  // Método para obtener los datos del personaje desde el endpoint
+
   private fetchCharacterData(endpoint: string): void {
+
     this.http.get(endpoint).subscribe(
-      (character: any) => {
-        // Guardamos el personaje en el localStorage
+      async (character: any) => {
+
+        if (this.foundService.isFound(character.id)) {
+          const alert = await this.alertController.create({
+            header: 'Personaje ya encontrado',
+            message: 'El personaje ya está en tu lista.',
+            buttons: ['OK'],
+          });
+          await alert.present();
+          return;
+        }
+
+        await this.getLocation();
+
+        character.ubicacion = {
+          lat: this.location?.latitude,
+          lng: this.location?.longitude
+        };
+
         this.foundService.addFound(character);
-        const alert = this.alertController.create({
-          header: 'Character Found',
+
+        const successAlert = await this.alertController.create({
+          header: 'Personaje Encontrado',
           message: `Se encontró al personaje: ${character.name}`,
           buttons: ['OK'],
         });
-        alert.then(a => a.present());
+
+        await successAlert.present();
+
       },
       (error) => {
         console.error("Error fetching character data:", error);
@@ -88,8 +129,31 @@ export class ScanCodeComponent implements OnInit {
           header: 'Error',
           message: 'No se pudo obtener los datos del personaje.',
           buttons: ['OK'],
-        }).then(a => a.present());
+        }).then(alert => alert.present());
       }
     );
+  }
+
+  private async getLocation(): Promise<void> {
+    try {
+      const position = await Geolocation.getCurrentPosition(); 
+      this.location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      };
+    } catch (error) {
+      console.error("Error getting location:", error);
+      this.location = undefined;
+    }
+  }
+
+  async openCharacterModal(character: any) {
+    const modal = await this.modalController.create({
+      component: PersonajeModalComponent,
+      componentProps: {
+        character: character
+      }
+    });
+    return await modal.present();
   }
 }

@@ -1,3 +1,15 @@
+ion-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+ion-card{
+    max-width: 300px;
+    margin: 20px auto;
+}
+
 img{
     width: 100%;
 }
