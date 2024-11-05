@@ -5,6 +5,7 @@ import { FoundServiceService } from 'src/app/services/found-service.service';
 import { HttpClient } from '@angular/common/http';
 import { Geolocation } from '@capacitor/geolocation';
 import { PersonajeModalComponent } from '../personaje-modal/personaje-modal.component';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 
 @Component({
@@ -17,22 +18,35 @@ export class ScanCodeComponent implements OnInit {
   isSupported = false;
   barcodes: Barcode[] = [];
   location: { latitude: number; longitude: number } | undefined;
+  mapUrl: SafeResourceUrl | undefined;
 
   constructor(
     private alertController: AlertController,
     private foundService: FoundServiceService,
     private modalController: ModalController,
-    private http: HttpClient
+    private http: HttpClient,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
+    
     BarcodeScanner.isSupported().then((result) => {
       this.isSupported = result.supported;
     });
-
+    
     this.foundService.found$.subscribe(found => {
       this.characters = found;
     });
+    
+  }
+
+  getMapUrl(character: any): SafeResourceUrl {
+    const lng = character.ubicacion.lng;
+    const lat = character.ubicacion.lat;
+    const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+    
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   async scan(): Promise<void> {

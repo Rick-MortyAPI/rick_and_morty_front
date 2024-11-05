@@ -2,7 +2,10 @@
 
   <ion-card (click)="openCharacterModal(character)" *ngFor="let character of characters">
     
-    <img alt="Silhouette of mountains" src="{{ character.image }}" />
+    <iframe width="400" height="300" 
+            [src]="getMapUrl(character)" 
+            style="border: 1px solid black">
+    </iframe><br/>
 
     <ion-card-header>
       <ion-card-title>{{ character.name }}</ion-card-title>
