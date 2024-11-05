@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -15,14 +15,19 @@ export class AuthServiceService {
 
   // Método para iniciar sesión
   login(email: string, contrasenia: string): Observable<boolean> {
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-
-    if (storedUser.email === email && storedUser.contrasenia === contrasenia) {
-      this.isAuthenticated.next(true);
-      return of(true);
-    } else {
-      return of(false);
-    }
+    return this.http.get<{ email: string, contrasenia: string }[]>(`${this.API_URL}/getAll`).pipe(
+      map(users => {
+        const user = users.find(u => u.email === email && u.contrasenia === contrasenia);
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          this.isAuthenticated.next(true); // Marca como autenticado
+          return true; // Devuelve true si las credenciales son válidas
+        } else {
+          return false; // Devuelve false si no se encuentra el usuario
+        }
+      }),
+      catchError(() => of(false)) // Devuelve false si hay un error
+    );
   }
 
   // Método para registrar un nuevo usuario en la API

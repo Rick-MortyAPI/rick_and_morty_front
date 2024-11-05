@@ -39,14 +39,13 @@ export class LoginComponent {
       loggedIn => {
         if (loggedIn) {
           this.presentToast('Inicio de sesión exitoso', 'success');
-          this.router.navigate(['/home']); 
-          this.presentToast('Credenciales inválidas', 'danger'); 
+          this.router.navigate(['/tabs']); // Redirige a las tabs
+        } else {
+          this.presentToast('Credenciales inválidas', 'danger'); // Mensaje de error si las credenciales son incorrectas
         }
       },
       error => {
-       
-        const errorMessage = error.error?.error || 'Error al iniciar sesión'; 
-        this.presentToast(errorMessage, 'danger'); 
+        this.presentToast('Error al intentar iniciar sesión', 'danger'); // Mensaje de error genérico
       }
     );
   }
