@@ -6,6 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class FoundServiceService {
 
+  private foundCharacters: any[] = [];
   private foundSubject = new BehaviorSubject<any[]>(this.loadFound());
   found$ = this.foundSubject.asObservable();
 
@@ -20,14 +21,21 @@ export class FoundServiceService {
     }
   }
 
+  isCharacterFound(id: string): boolean {
+    return this.getFound().some(character => character.id === id);
+  }
+
   getFound(): any[] {
     return this.foundSubject.value;
   }
 
-  addFound(character: any) {
-    const currentFound = this.getFound();
-    currentFound.push(character);
-    this.updateFound(currentFound);
+  addFound(character: any): void {
+    this.foundCharacters.push(character);
+    this.foundSubject.next(this.foundCharacters);
+  }
+
+  isFound(characterId: string): boolean {
+    return this.foundCharacters.some(character => character.id === characterId);
   }
 
   removeFound(character: any) {
