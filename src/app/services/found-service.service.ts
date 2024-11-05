@@ -34,10 +34,6 @@ export class FoundServiceService {
     this.foundSubject.next(this.foundCharacters);
   }
 
-  isFound(characterId: string): boolean {
-    return this.foundCharacters.some(character => character.id === characterId);
-  }
-
   removeFound(character: any) {
     const currentFound = this.getFound().filter(found => found.id !== character.id);
     this.updateFound(currentFound);

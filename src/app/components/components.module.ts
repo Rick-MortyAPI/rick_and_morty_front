@@ -8,6 +8,8 @@ import { PersonajeModalComponent } from './personaje-modal/personaje-modal.compo
 import { SearchComponent } from './search/search.component';
 import { FormsModule } from '@angular/forms';
 import { ScanCodeComponent } from './scan-code/scan-code.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
 
 
 @NgModule({
@@ -18,6 +20,8 @@ import { ScanCodeComponent } from './scan-code/scan-code.component';
     PersonajeModalComponent,
     SearchComponent,
     ScanCodeComponent,
+    LoginComponent,
+    RegisterComponent
   ],
   imports: [
     CommonModule,
@@ -31,6 +35,8 @@ import { ScanCodeComponent } from './scan-code/scan-code.component';
     PersonajeModalComponent,
     SearchComponent,
     ScanCodeComponent,
+    LoginComponent,
+    RegisterComponent
   ]
 })
 export class ComponentsModule { }

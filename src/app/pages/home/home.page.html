@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Home</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ng-container *ngIf="isLogin; else registerTemplate">
+      <app-login (switchToRegister)="toggleForm()" [@fadeAnimation]></app-login>
+    </ng-container>
+
+    <ng-template #registerTemplate>
+      <app-register (switchToLogin)="toggleForm()" [@fadeAnimation]></app-register>
+    </ng-template>
+</ion-content>
+
