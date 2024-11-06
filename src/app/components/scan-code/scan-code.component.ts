@@ -26,7 +26,6 @@ export class ScanCodeComponent implements OnInit {
     private modalController: ModalController,
     private http: HttpClient,
     private sanitizer: DomSanitizer
-    private http: HttpClient
   ) {}
 
   ngOnInit() {
