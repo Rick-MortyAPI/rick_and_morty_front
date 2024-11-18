@@ -1,0 +1,30 @@
+.subasta-card {
+    margin-bottom: 16px;
+
+    ion-card-header {
+        display: flex;
+        align-items: center;
+    }
+
+    ion-thumbnail img {
+        border-radius: 50%;
+        object-fit: cover;
+        width: 60px;
+        height: 60px;
+    }
+
+    .disponible {
+        color: green;
+    }
+
+    .confirmado {
+        color: blue;
+    }
+
+    .no-subastas {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 16px;
+        color: gray;
+    }
+}

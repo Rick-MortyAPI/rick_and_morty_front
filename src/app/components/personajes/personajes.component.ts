@@ -10,11 +10,11 @@ import { CharactersServiceService } from '../../services/characters-service.serv
   styleUrls: ['./personajes.component.scss'],
 })
 export class PersonajesComponent implements OnInit {
-
   characters: any[] = [];
   favoritesList: any[] = [];
   currentPage = 1;
   isLoading = false;
+  searchTerm = ''; // Nuevo: término de búsqueda
   toastMessage = '';
   isToastOpen = false;
 
@@ -30,8 +30,9 @@ export class PersonajesComponent implements OnInit {
     this.favoritesService.loadFavorites(); // Cargar favoritos desde la API
   }
 
+  // Cargar personajes desde la API con paginación
   private loadCharacters(event?: InfiniteScrollCustomEvent): void {
-    if (this.isLoading) return;
+    if (this.isLoading || this.searchTerm.trim()) return; // Evitar recargar durante búsqueda
 
     this.isLoading = true;
 
@@ -50,6 +51,31 @@ export class PersonajesComponent implements OnInit {
     });
   }
 
+  // Buscar personajes
+  onSearch(event: any): void {
+    const query = event.target.value.trim();
+    this.searchTerm = query;
+
+    if (!query) {
+      this.characters = []; // Reiniciar personajes si no hay término de búsqueda
+      this.currentPage = 1; // Reiniciar paginación
+      this.loadCharacters(); // Recargar todos los personajes
+      return;
+    }
+
+    this.charactersService.searchCharacters(query).subscribe({
+      next: (data) => {
+        this.characters = data.results;
+      },
+      error: (err) => {
+        console.error('Error searching characters:', err);
+        this.showToast('Error searching characters.');
+        this.characters = [];
+      },
+    });
+  }
+
+  // Suscribirse a los cambios en la lista de favoritos
   private subscribeToFavorites(): void {
     this.favoritesService.favorites$.subscribe({
       next: (favorites) => (this.favoritesList = favorites),
@@ -130,5 +156,4 @@ export class PersonajesComponent implements OnInit {
   onIonInfinite(event: InfiniteScrollCustomEvent): void {
     this.loadCharacters(event);
   }
-
 }
