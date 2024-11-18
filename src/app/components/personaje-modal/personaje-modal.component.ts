@@ -6,13 +6,11 @@ import { ModalController } from '@ionic/angular';
   templateUrl: './personaje-modal.component.html',
   styleUrls: ['./personaje-modal.component.scss'],
 })
-export class PersonajeModalComponent  implements OnInit {
+export class PersonajeModalComponent {
 
   @Input() character: any;
 
   constructor( private modalController: ModalController ) {}
-
-  ngOnInit(): void {}
 
   dismiss() {
     this.modalController.dismiss();

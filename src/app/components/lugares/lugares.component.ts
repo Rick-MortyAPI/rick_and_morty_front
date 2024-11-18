@@ -13,11 +13,12 @@ import { FavoritesServiceService } from 'src/app/services/favorites-service.serv
 export class LugaresComponent implements OnInit {
 
   lugaresList: any[] = [];
-  residentesList: { [key: string]: any[] } = {}; 
-  loading: boolean = true;
-  currentPage: number = 1;
-  isToastOpen: boolean = false;
-  toastMessage: string = '';
+  residentesList: { [key: string]: any[] } = {};
+  favoritesList: any[] = []; // Lista reactiva de favoritos
+  loading = true;
+  currentPage = 1;
+  isToastOpen = false;
+  toastMessage = '';
 
   constructor(
     private _locationService: LocationsServiceService,
@@ -26,77 +27,125 @@ export class LugaresComponent implements OnInit {
     private favoritesService: FavoritesServiceService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.getAllLocations();
+    this.subscribeToFavorites();
+    this.favoritesService.loadFavorites(); // Cargar favoritos iniciales
   }
 
-  getAllLocations() {
-    this._locationService.getLocationsByPage(this.currentPage).subscribe(
-      data => {
-        this.lugaresList = [...this.lugaresList, ...data]; // Añadir las localizaciones nuevas
-        this.lugaresList.forEach(lugar => {
-          this.obtenerResidentes(lugar);
-        });
+  getAllLocations(): void {
+    this._locationService.getLocationsByPage(this.currentPage).subscribe({
+      next: (data) => {
+        this.lugaresList = [...this.lugaresList, ...data];
+        this.lugaresList.forEach((lugar) => this.obtenerResidentes(lugar));
         this.loading = false;
       },
-      error => {
-        console.error('Error fetching locations:', error);
+      error: (err) => {
+        console.error('Error fetching locations:', err);
         this.loading = false;
-      }
-    );
+      },
+    });
   }
 
-
-  obtenerResidentes(lugar: any) {
+  obtenerResidentes(lugar: any): void {
     const residents = lugar.residents;
-    this.residentesList[lugar.id] = []; 
+    this.residentesList[lugar.id] = [];
 
     residents.forEach((url: string) => {
-      this._rickyMortyService.getCharacterByUrl(url)
-        .subscribe(
-          data => {
-            this.residentesList[lugar.id].push(data);
-          },
-          error => {
-            console.error(`Error fetching resident from ${url}:`, error);
-          }
-        );
+      this._rickyMortyService.getCharacterByUrl(url).subscribe({
+        next: (data) => {
+          this.residentesList[lugar.id].push(data);
+        },
+        error: (err) => {
+          console.error(`Error fetching resident from ${url}:`, err);
+        },
+      });
     });
   }
 
-  async openCharacterModal(character: any) {
-    const modal = await this.modalController.create({
-      component: PersonajeModalComponent,
-      componentProps: {
-        character: character
-      }
+  // Suscribirse a los cambios en la lista de favoritos
+  private subscribeToFavorites(): void {
+    this.favoritesService.favorites$.subscribe({
+      next: (favorites) => {
+        this.favoritesList = favorites;
+      },
+      error: (err) => {
+        console.error('Error loading favorites:', err);
+        this.showToast('Error loading favorites.');
+      },
     });
-    return await modal.present();
   }
 
   isFavorite(character: any): boolean {
-    return this.favoritesService.isFavorite(character);
+    return this.favoritesList.some((fav) => fav.idPersonaje === character.id);
   }
 
-  toggleFavorite(character: any) {
+  toggleFavorite(character: any): void {
+    const user = localStorage.getItem('user');
+    const currentUser = user ? JSON.parse(user) : null;
 
-    if (this.isFavorite(character)) {
-      this.favoritesService.removeFavorite(character);
-      this.toastMessage = `${character.name} removed from favorites`;
-    } else {
-      this.favoritesService.addFavorite(character);
-      this.toastMessage = `${character.name} added to favorites`;
+    if (!currentUser || !currentUser.id) {
+      this.showToast('Error: Usuario no autenticado.');
+      return;
     }
 
-    this.isToastOpen = true;
+    const usuarioId = currentUser.id;
 
+    if (this.isFavorite(character)) {
+      this.removeFavorite(character);
+    } else {
+      this.addFavorite(character, usuarioId);
+    }
+  }
+
+  private addFavorite(character: any, usuarioId: number): void {
+    const newFavorite = { idPersonaje: character.id, idUsuario: usuarioId };
+
+    this.favoritesService.saveFavorito(newFavorite).subscribe({
+      next: () => {
+        this.toastMessage = `${character.name} added to favorites.`;
+        this.showToast(this.toastMessage);
+      },
+      error: (err) => {
+        console.error('Error adding favorite:', err);
+        this.showToast('Error adding favorite.');
+      },
+    });
+  }
+
+  private removeFavorite(character: any): void {
+    const favorite = this.favoritesList.find((fav) => fav.idPersonaje === character.id);
+    if (!favorite) return;
+
+    this.favoritesService.deleteFavorito(favorite.id).subscribe({
+      next: () => {
+        this.toastMessage = `${character.name} removed from favorites.`;
+        this.showToast(this.toastMessage);
+      },
+      error: (err) => {
+        console.error('Error removing favorite:', err);
+        this.showToast('Error removing favorite.');
+      },
+    });
+  }
+
+  async openCharacterModal(character: any): Promise<void> {
+    const modal = await this.modalController.create({
+      component: PersonajeModalComponent,
+      componentProps: { character },
+    });
+    await modal.present();
+  }
+
+  private showToast(message: string): void {
+    this.toastMessage = message;
+    this.isToastOpen = true;
     setTimeout(() => {
       this.isToastOpen = false;
     }, 3000);
-
   }
 
-  onIonInfinite(event: InfiniteScrollCustomEvent) {
+  onIonInfinite(event: InfiniteScrollCustomEvent): void {
     this.currentPage++;
     this.getAllLocations();
     event.target.complete();
