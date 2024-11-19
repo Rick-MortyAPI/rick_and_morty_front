@@ -77,13 +77,27 @@ export class PersonajesComponent implements OnInit {
 
   // Suscribirse a los cambios en la lista de favoritos
   private subscribeToFavorites(): void {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      console.error('Usuario no autenticado.');
+      return;
+    }
+
     this.favoritesService.favorites$.subscribe({
-      next: (favorites) => (this.favoritesList = favorites),
+      next: (favorites) => {
+        // Filtrar los favoritos solo para el usuario actual
+        this.favoritesList = favorites.filter((fav) => fav.idUsuario === currentUser.id);
+      },
       error: (err) => {
         console.error('Error loading favorites:', err);
         this.showToast('Error loading favorites.');
       },
     });
+  }
+
+  private getCurrentUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
   }
 
   isFavorite(character: any): boolean {
@@ -113,14 +127,16 @@ export class PersonajesComponent implements OnInit {
 
     this.favoritesService.saveFavorito(newFavorite).subscribe({
       next: () => {
-        this.showToast(`${character.name} added to favorites.`);
+        this.showToast(`${character.name} agregado a favoritos.`);
+        this.favoritesService.loadFavorites(); // Refrescar la lista de favoritos
       },
       error: (err) => {
-        console.error('Error adding favorite:', err);
-        this.showToast('Error adding favorite.');
+        console.error('Error agregando a favoritos:', err);
+        this.showToast('Error al agregar a favoritos.');
       },
     });
   }
+
 
   private removeFavorite(character: any): void {
     const favorite = this.favoritesList.find((fav) => fav.idPersonaje === character.id);

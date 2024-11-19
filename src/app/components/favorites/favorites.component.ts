@@ -3,6 +3,7 @@ import { PersonajeModalComponent } from '../personaje-modal/personaje-modal.comp
 import { ModalController } from '@ionic/angular';
 import { FavoritesServiceService } from 'src/app/services/favorites-service.service';
 import { CharactersServiceService } from 'src/app/services/characters-service.service';
+import { CapturadoService } from 'src/app/services/capturado.service';
 
 @Component({
   selector: 'app-favorites',
@@ -10,114 +11,111 @@ import { CharactersServiceService } from 'src/app/services/characters-service.se
   styleUrls: ['./favorites.component.scss'],
 })
 export class FavoritesComponent implements OnInit {
-  characters: any[] = [];
-  toastMessage: string = '';
-  isToastOpen: boolean = false;
+
+  viewMode: 'favorites' | 'capturados' = 'favorites'; // Modo de visualización actual
+  favorites: any[] = [];
+  capturados: any[] = [];
+  toastMessage = '';
+  isToastOpen = false;
 
   constructor(
-    private modalController: ModalController,
     private favoritesService: FavoritesServiceService,
-    private charactersService: CharactersServiceService
+    private charactersService: CharactersServiceService,
+    private capturadoService: CapturadoService,
+    private modalController: ModalController
   ) { }
 
   ngOnInit(): void {
     this.loadFavorites();
+    this.loadCapturados();
   }
 
   private loadFavorites(): void {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return;
+
     this.favoritesService.favorites$.subscribe({
       next: (favorites) => {
-        const characterDetails$ = favorites.map((favorite) =>
-          this.charactersService
-            .getCharacterByUrl(`https://rickandmortyapi.com/api/character/${favorite.idPersonaje}`)
-            .toPromise()
+        const userFavorites = favorites.filter((fav) => fav.idUsuario === currentUser.id);
+        const details$ = userFavorites.map((fav) =>
+          this.charactersService.getCharacterById(fav.idPersonaje).toPromise()
         );
 
-        Promise.all(characterDetails$)
+        Promise.all(details$)
           .then((characters) => {
-            this.characters = characters.map((character, index) => ({
-              ...character,
-              idFavorito: favorites[index].id,
+            this.favorites = characters.map((char, idx) => ({
+              ...char,
+              idFavorito: userFavorites[idx].id,
             }));
           })
-          .catch((err) => {
-            console.error('Error fetching character details:', err);
-          });
+          .catch((err) => console.error('Error loading favorite details:', err));
       },
-      error: (err) => {
-        this.showToast('Error loading favorites. Please try again later.');
-        console.error(err);
-      },
+      error: (err) => console.error('Error loading favorites:', err),
     });
-    this.favoritesService.loadFavorites(); // Cargar favoritos al inicializar
+
+    this.favoritesService.loadFavorites();
   }
 
-  isFavorite(character: any): boolean {
-    return this.characters.some((fav) => fav.id === character.id);
-  }
+  private loadCapturados(): void {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return;
 
-  toggleFavorite(character: any): void {
-    const user = localStorage.getItem('user');
-    const currentUser = user ? JSON.parse(user) : null;
+    this.capturadoService.getCapturadosByUser(currentUser.id).subscribe({
+      next: (capturados) => {
+        const grouped = this.groupCapturados(capturados);
+        const details$ = grouped.map((group) =>
+          this.charactersService.getCharacterById(group.idPersonaje).toPromise().then((char) => ({
+            ...char,
+            quantity: group.quantity,
+          }))
+        );
 
-    if (!currentUser || !currentUser.id) {
-      this.showToast('Error: Usuario no autenticado.');
-      return;
-    }
-
-    const usuarioId = currentUser.id;
-
-    if (this.isFavorite(character)) {
-      this.removeFavorite(character);
-    } else {
-      this.addFavorite(character, usuarioId);
-    }
-  }
-
-  private addFavorite(character: any, usuarioId: number): void {
-    const newFavorite = { idPersonaje: character.id, idUsuario: usuarioId };
-
-    this.favoritesService.saveFavorito(newFavorite).subscribe({
-      next: () => {
-        this.showToast(`${character.name} added to favorites.`);
-        this.favoritesService.loadFavorites(); // Refrescar la lista de favoritos
+        Promise.all(details$)
+          .then((results) => {
+            this.capturados = results;
+          })
+          .catch((err) => console.error('Error loading capturados details:', err));
       },
-      error: (err) => {
-        console.error('Error adding favorite:', err);
-        this.showToast('Error adding favorite.');
-      },
+      error: (err) => console.error('Error loading capturados:', err),
     });
   }
 
-  private removeFavorite(character: any): void {
-    const favorite = this.characters.find((fav) => fav.id === character.id);
-    if (!favorite) return;
+  private groupCapturados(capturados: any[]): any[] {
+    const grouped = capturados.reduce((acc: any[], curr) => {
+      const existing = acc.find((item) => item.idPersonaje === curr.idPersonaje);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        acc.push({ idPersonaje: curr.idPersonaje, quantity: 1 });
+      }
+      return acc;
+    }, []);
+    return grouped;
+  }
 
+  toggleFavorite(favorite: any): void {
     this.favoritesService.deleteFavorito(favorite.idFavorito).subscribe({
       next: () => {
-        this.showToast(`${character.name} removed from favorites.`);
-        this.favoritesService.loadFavorites(); // Refrescar la lista de favoritos
+        this.favorites = this.favorites.filter((fav) => fav.idFavorito !== favorite.idFavorito);
+        this.showToast(`${favorite.name} eliminado de favoritos.`);
       },
       error: (err) => {
         console.error('Error removing favorite:', err);
-        this.showToast('Error removing favorite.');
       },
     });
   }
 
-  async openCharacterModal(character: any): Promise<void> {
-    const modal = await this.modalController.create({
-      component: PersonajeModalComponent,
-      componentProps: { character },
-    });
-    await modal.present();
+  private getCurrentUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
   }
 
-  private showToast(message: string = ''): void {
-    if (message) this.toastMessage = message;
+  private showToast(message: string): void {
+    this.toastMessage = message;
     this.isToastOpen = true;
     setTimeout(() => {
       this.isToastOpen = false;
     }, 3000);
   }
+  
 }

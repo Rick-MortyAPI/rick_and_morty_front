@@ -1,30 +1,20 @@
-.subasta-card {
-    margin-bottom: 16px;
+.completed {
+    opacity: 0.6;
+    /* Hacer que parezca deshabilitado */
+    pointer-events: none;
+    /* Deshabilitar interacciones */
+    background-color: #e0e0e0;
+    /* Cambiar color de fondo */
+}
 
-    ion-card-header {
-        display: flex;
-        align-items: center;
-    }
+.completed ion-label h2 {
+    text-decoration: line-through;
+    /* Agregar una línea al nombre */
+    color: #757575;
+    /* Cambiar el color del texto */
+}
 
-    ion-thumbnail img {
-        border-radius: 50%;
-        object-fit: cover;
-        width: 60px;
-        height: 60px;
-    }
-
-    .disponible {
-        color: green;
-    }
-
-    .confirmado {
-        color: blue;
-    }
-
-    .no-subastas {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 16px;
-        color: gray;
-    }
+.completed ion-thumbnail img {
+    filter: grayscale(100%);
+    /* Cambiar a escala de grises */
 }

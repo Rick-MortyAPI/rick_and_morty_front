@@ -9,7 +9,9 @@
 
 <ion-content>
   <ion-list *ngIf="subastas.length > 0; else noSubastas">
-    <ion-item *ngFor="let subasta of subastas">
+    <ion-item *ngFor="let subasta of subastas" [class.completed]="subasta.estado === 'Completado'"
+      [disabled]="subasta.estado === 'Completado'">
+
       <ion-thumbnail slot="start">
         <img [src]="subasta.personajeImage" alt="{{ subasta.personajeName }}">
       </ion-thumbnail>
@@ -23,10 +25,11 @@
       </ion-label>
 
       <ion-buttons slot="end">
-        <ion-button *ngIf="!isOwnSubasta(subasta)" (click)="openSubastaModal(subasta)" color="success">
+        <ion-button *ngIf="!isOwnSubasta(subasta) && subasta.estado !== 'Completado'"
+          (click)="openSubastaModal(subasta)" color="success">
           Intercambiar
         </ion-button>
-        <ion-button *ngIf="isOwnSubasta(subasta)" disabled color="medium">
+        <ion-button *ngIf="isOwnSubasta(subasta) && subasta.estado !== 'Completado'" disabled color="medium">
           Mi Subasta
         </ion-button>
       </ion-buttons>

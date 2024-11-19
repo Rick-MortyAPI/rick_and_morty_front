@@ -27,7 +27,10 @@
     </ion-list>
 
     <ng-template #noCharacters>
-      <p>No hay personajes para mostrar. ¡Prueba con otro término de búsqueda!</p>
+      <div class="ion-text-center ion-padding">
+        <ion-icon name="alert-circle-outline" size="large" color="medium"></ion-icon>
+        <p>No hay personajes para mostrar. ¡Prueba con otro término de búsqueda!</p>
+      </div>
     </ng-template>
 
     <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
