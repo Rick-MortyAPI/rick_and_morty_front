@@ -18,7 +18,7 @@ export class LoginComponent {
     private authService: AuthServiceService,
     private toastController: ToastController,
     private router: Router
-  ) {}
+  ) { }
 
   emitSwitchToRegister() {
     this.switchToRegister.emit();
@@ -39,13 +39,13 @@ export class LoginComponent {
       loggedIn => {
         if (loggedIn) {
           this.presentToast('Inicio de sesión exitoso', 'success');
-          this.router.navigate(['/tabs']); // Redirige a las tabs
+          this.router.navigate(['/tabs']);
         } else {
-          this.presentToast('Credenciales inválidas', 'danger'); // Mensaje de error si las credenciales son incorrectas
+          this.presentToast('Credenciales inválidas', 'danger');
         }
       },
       error => {
-        this.presentToast('Error al intentar iniciar sesión', 'danger'); // Mensaje de error genérico
+        this.presentToast('Error al intentar iniciar sesión', 'danger');
       }
     );
   }

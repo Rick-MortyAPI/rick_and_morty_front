@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title class="ion-text-center">Crear Subasta</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="personajesCapturados.length > 0; else noCapturados">
+    <form (ngSubmit)="createSubasta()" #subastaForm="ngForm">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title class="ion-text-center">Selecciona un Personaje</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <!-- Seleccionar personaje -->
+          <ion-item lines="full">
+            <ion-label position="stacked">Personaje</ion-label>
+            <ion-select [(ngModel)]="subasta.idCapturado" name="idCapturado" required>
+              <ion-select-option *ngFor="let capturado of personajesCapturados" [value]="capturado.id"
+                [disabled]="isSubastado(capturado.id)">
+                <ion-item>
+                  <ion-avatar slot="start">
+                    <img [src]="capturado.imagen" alt="{{ capturado.nombrePersonaje }}">
+                  </ion-avatar>
+                  <ion-label>
+                    {{ capturado.nombrePersonaje }}
+                    <ion-text *ngIf="isSubastado(capturado.id)" color="danger">(Ya subastado)</ion-text>
+                  </ion-label>
+                </ion-item>
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Fecha Inicio -->
+          <ion-item lines="full">
+            <ion-label position="stacked">Fecha Inicio</ion-label>
+            <ion-input [value]="subasta.horaInicial | date: 'short'" readonly></ion-input>
+          </ion-item>
+
+          <!-- Fecha Fin -->
+          <ion-item lines="full">
+            <ion-label position="stacked">Fecha Fin</ion-label>
+            <ion-input [value]="subasta.horaFinal | date: 'short'" readonly></ion-input>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-footer>
+        <ion-toolbar>
+          <ion-buttons slot="end">
+            <ion-button type="submit" [disabled]="!subastaForm.form.valid" expand="block" color="success">
+              Crear Subasta
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-footer>
+    </form>
+  </div>
+
+  <!-- No Capturados -->
+  <ng-template #noCapturados>
+    <div class="ion-padding ion-text-center">
+      <ion-icon name="sad-outline" size="large" color="medium"></ion-icon>
+      <p>No tienes personajes capturados disponibles para subastar.</p>
+    </div>
+  </ng-template>
+</ion-content>

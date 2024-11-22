@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title class="ion-text-center">Confirmar Intercambio</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Detalles del personaje en subasta -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Personaje en Subasta</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-avatar slot="start">
+          <img [src]="subasta.personajeImagen" alt="{{ subasta.personajeNombre }}">
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ subasta.personajeNombre }}</h2>
+          <p>Subastado por: {{ subasta.usuario }}</p>
+          <p>Estado: <strong>{{ subasta.estado }}</strong></p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Selección de personaje para intercambio -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Selecciona un Personaje para Intercambiar</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list *ngIf="personajesCapturados.length > 0; else noCapturados">
+        <ion-item *ngFor="let personaje of personajesCapturados" (click)="selectPersonaje(personaje)" detail>
+          <ion-avatar slot="start">
+            <img [src]="personaje.imagen" alt="{{ personaje.nombre }}">
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ personaje.nombre }}</h2>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <ng-template #noCapturados>
+        <div class="ion-text-center ion-padding">
+          <ion-icon name="sad-outline" size="large" color="medium"></ion-icon>
+          <p>No tienes personajes capturados disponibles para el intercambio.</p>
+        </div>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Botón de confirmación -->
+  <ion-footer>
+    <ion-toolbar>
+      <ion-buttons slot="end">
+        <ion-button expand="block" color="success" [disabled]="!selectedPersonaje" (click)="confirmExchange()">
+          Aceptar Intercambio
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-footer>
+</ion-content>

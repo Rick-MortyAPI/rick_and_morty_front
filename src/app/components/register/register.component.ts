@@ -19,8 +19,8 @@ export class RegisterComponent {
   constructor(
     private authService: AuthServiceService,
     private toastController: ToastController,
-    private router: Router // Inyectar Router
-  ) {}
+    private router: Router
+  ) { }
 
   emitSwitchToLogin() {
     this.switchToLogin.emit();
@@ -42,18 +42,18 @@ export class RegisterComponent {
       return; // Detener la ejecución si hay campos vacíos
     }
 
-    const numIntercambios = 0; // Valor predeterminado
-    const numCapturados = 0; // Valor predeterminado
-
-    // Envía los datos al servicio de registro
-    this.authService.register(this.nombre, this.apellido, this.email, this.contrasenia, numIntercambios, numCapturados).subscribe(
-      response => {
-        this.presentToast('Registro exitoso', 'success');
-        this.router.navigate(['/tabs']); // Redirige a las tabs después del registro
+    this.authService.register(this.nombre, this.apellido, this.email, this.contrasenia).subscribe(
+      registered => {
+        if (registered) {
+          this.presentToast('Registro exitoso', 'success');
+          this.router.navigate(['/tabs']); // Redirige a las tabs
+        } else {
+          this.presentToast('Error durante el registro. Inténtalo de nuevo.', 'danger');
+        }
       },
       error => {
-        const errorMessage = error.error?.error || 'Error al registrarse'; 
-        this.presentToast(errorMessage, 'danger');
+        this.presentToast('Error al registrarse. Inténtalo de nuevo.', 'danger');
+        console.error('Error en registro:', error);
       }
     );
   }

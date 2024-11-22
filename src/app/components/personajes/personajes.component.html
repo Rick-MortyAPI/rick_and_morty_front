@@ -1,16 +1,16 @@
 <ion-card>
-  
   <ion-card-header>
     <ion-card-title>API All Characters</ion-card-title>
     <ion-card-subtitle>Rick and Morty</ion-card-subtitle>
   </ion-card-header>
-  
-  <ion-card-content>
-    
-    <ion-list class="card">
 
+  <ion-card-content>
+    <!-- Barra de búsqueda -->
+    <ion-searchbar placeholder="Buscar personaje" (ionInput)="onSearch($event)" debounce="500">
+    </ion-searchbar>
+
+    <ion-list class="card" *ngIf="characters.length > 0; else noCharacters">
       <ion-item class="items" *ngFor="let character of characters">
-        
         <ion-thumbnail slot="start">
           <img alt="{{ character.name }}" src="{{ character.image }}" />
         </ion-thumbnail>
@@ -23,18 +23,20 @@
         <ion-button shape="round" class="boton" id="open-toast" (click)="toggleFavorite(character)">
           <ion-icon slot="icon-only" [name]="isFavorite(character) ? 'star' : 'star-outline'"></ion-icon>
         </ion-button>
-        
-        
       </ion-item>
-
-      <ion-toast id="toast" [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
-
     </ion-list>
+
+    <ng-template #noCharacters>
+      <div class="ion-text-center ion-padding">
+        <ion-icon name="alert-circle-outline" size="large" color="medium"></ion-icon>
+        <p>No hay personajes para mostrar. ¡Prueba con otro término de búsqueda!</p>
+      </div>
+    </ng-template>
 
     <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
       <ion-infinite-scroll-content></ion-infinite-scroll-content>
     </ion-infinite-scroll>
 
+    <ion-toast id="toast" [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
   </ion-card-content>
-
 </ion-card>

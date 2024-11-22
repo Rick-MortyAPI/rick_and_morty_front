@@ -1,34 +1,76 @@
-<ion-card>
-  <ion-card-header>
-    <ion-card-subtitle>Personajes seleccionados</ion-card-subtitle>
-  </ion-card-header>
+<ion-header>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="viewMode">
+      <ion-segment-button value="favorites">
+        <ion-label>Favoritos</ion-label>
+        <ion-icon name="star"></ion-icon>
+      </ion-segment-button>
+      <ion-segment-button value="capturados">
+        <ion-label>Capturados</ion-label>
+        <ion-icon name="cube"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
 
-  <ion-card-content>
+<ion-content>
+  <!-- Favoritos -->
+  <ng-container *ngIf="viewMode === 'favorites'">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Favoritos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="favorites.length > 0; else noFavorites">
+          <ion-item *ngFor="let favorite of favorites">
+            <ion-thumbnail slot="start">
+              <img [src]="favorite.image" alt="{{ favorite.name }}" />
+            </ion-thumbnail>
+            <ion-label>
+              <h2>{{ favorite.name }}</h2>
+            </ion-label>
+            <ion-button slot="end" color="danger" (click)="toggleFavorite(favorite)">
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+        <ng-template #noFavorites>
+          <div class="ion-text-center ion-padding">
+            <ion-icon name="sad-outline" size="large"></ion-icon>
+            <p>No tienes personajes favoritos.</p>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
 
-    <ion-list class="card" *ngIf="characters.length > 0; else noCharacters">
-      <ion-item class="items" *ngFor="let character of characters">
-        
-        <ion-thumbnail slot="start">
-          <img alt="{{ character.name }}" src="{{ character.image }}" />
-        </ion-thumbnail>
-        <ion-label>{{ character.name }}</ion-label>
+  <!-- Capturados -->
+  <ng-container *ngIf="viewMode === 'capturados'">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Capturados</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="capturados.length > 0; else noCapturados">
+          <ion-item *ngFor="let capturado of capturados">
+            <ion-thumbnail slot="start">
+              <img [src]="capturado.image" alt="{{ capturado.name }}" />
+            </ion-thumbnail>
+            <ion-label>
+              <h2>{{ capturado.name }}</h2>
+              <p>Cantidad: {{ capturado.quantity }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        <ng-template #noCapturados>
+          <div class="ion-text-center ion-padding">
+            <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+            <p>No tienes personajes capturados.</p>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
 
-        <ion-button shape="round" class="boton" (click)="openCharacterModal(character)">
-          <ion-icon slot="icon-only" name="eye"></ion-icon>
-        </ion-button>
-
-        <ion-button shape="round" class="boton" id="open-toast" (click)="toggleFavorite(character)">
-          <ion-icon slot="icon-only" [name]="isFavorite(character) ? 'star' : 'star-outline'"></ion-icon>
-        </ion-button>
-
-      </ion-item>
-
-      <ion-toast id="toast" [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
-    </ion-list>
-
-    <ng-template #noCharacters>
-      <p>No tienes ningun personaje seleccionado. Por favor, añade personajes a tu lista de favoritos!</p>
-    </ng-template>
-
-  </ion-card-content>
-</ion-card>
+  <ion-toast [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
+</ion-content>

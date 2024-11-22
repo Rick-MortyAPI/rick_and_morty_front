@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Subastas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openCreateSubastaModal()">Nueva Subasta</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list *ngIf="subastas.length > 0; else noSubastas">
+    <ion-item *ngFor="let subasta of subastas" [class.completed]="subasta.estado === 'Completado'"
+      [disabled]="subasta.estado === 'Completado'">
+
+      <ion-thumbnail slot="start">
+        <img [src]="subasta.personajeImage" alt="{{ subasta.personajeName }}">
+      </ion-thumbnail>
+
+      <ion-label>
+        <h2>{{ subasta.personajeName }}</h2>
+        <p>Usuario: {{ subasta.usuario }}</p>
+        <p>Estado: <strong>{{ subasta.estado }}</strong></p>
+        <p>Inicio: {{ subasta.horaInicial | date: 'short' }}</p>
+        <p>Fin: {{ subasta.horaFinal | date: 'short' }}</p>
+      </ion-label>
+
+      <ion-buttons slot="end">
+        <ion-button *ngIf="!isOwnSubasta(subasta) && subasta.estado !== 'Completado'"
+          (click)="openSubastaModal(subasta)" color="success">
+          Intercambiar
+        </ion-button>
+        <ion-button *ngIf="isOwnSubasta(subasta) && subasta.estado !== 'Completado'" disabled color="medium">
+          Mi Subasta
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #noSubastas>
+    <div class="no-subastas">
+      <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+      <p>No hay subastas disponibles en este momento.</p>
+    </div>
+  </ng-template>
+</ion-content>

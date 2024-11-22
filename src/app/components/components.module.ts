@@ -5,11 +5,13 @@ import { LugaresComponent } from './lugares/lugares.component';
 import { IonicModule } from '@ionic/angular';
 import { FavoritesComponent } from './favorites/favorites.component';
 import { PersonajeModalComponent } from './personaje-modal/personaje-modal.component';
-import { SearchComponent } from './search/search.component';
 import { FormsModule } from '@angular/forms';
 import { ScanCodeComponent } from './scan-code/scan-code.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { SubastaComponent } from './subasta/subasta.component';
+import { CreateSubastaModalComponent } from './subasta/create-subasta-modal/create-subasta-modal.component';
+import { SubastaModalComponent } from './subasta/subasta-modal/subasta-modal.component';
 
 
 @NgModule({
@@ -18,7 +20,9 @@ import { RegisterComponent } from './register/register.component';
     LugaresComponent,
     FavoritesComponent,
     PersonajeModalComponent,
-    SearchComponent,
+    SubastaComponent,
+    CreateSubastaModalComponent,
+    SubastaModalComponent,
     ScanCodeComponent,
     LoginComponent,
     RegisterComponent
@@ -33,7 +37,9 @@ import { RegisterComponent } from './register/register.component';
     LugaresComponent,
     FavoritesComponent,
     PersonajeModalComponent,
-    SearchComponent,
+    CreateSubastaModalComponent,
+    SubastaModalComponent,
+    SubastaComponent,
     ScanCodeComponent,
     LoginComponent,
     RegisterComponent

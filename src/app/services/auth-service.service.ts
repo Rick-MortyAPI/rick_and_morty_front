@@ -1,15 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthServiceService {
-  private isAuthenticated = new BehaviorSubject<boolean>(false);
+  private isAuthenticated = new BehaviorSubject<boolean>(this.checkLocalStorage());
   private readonly API_URL: string = "http://localhost:3000/api/usuarios";
+  private currentUser: any = null; // Almacenar el usuario autenticado
 
   constructor(private http: HttpClient) { }
 
@@ -17,62 +17,81 @@ export class AuthServiceService {
   login(email: string, contrasenia: string): Observable<boolean> {
     return this.http.get<{ email: string, contrasenia: string }[]>(`${this.API_URL}/getAll`).pipe(
       map(users => {
+        // Buscar usuario con email y contraseña coincidentes
         const user = users.find(u => u.email === email && u.contrasenia === contrasenia);
         if (user) {
+          // Guardar el usuario en localStorage
           localStorage.setItem('user', JSON.stringify(user));
-          this.isAuthenticated.next(true); // Marca como autenticado
-          return true; // Devuelve true si las credenciales son válidas
-        } else {
-          return false; // Devuelve false si no se encuentra el usuario
-        }
-      }),
-      catchError(() => of(false)) // Devuelve false si hay un error
-    );
-  }
 
-  // Método para registrar un nuevo usuario en la API
-  register(nombre: string, apellido: string, email: string, contrasenia: string, numIntercambios: number = 0, numCapturados: number = 0): Observable<any> {
-    const newUser = { 
-      nombre, 
-      apellido, 
-      email, 
-      contrasenia, 
-      numIntercambios, 
-      numCapturados 
-    };
-
-    // Realiza una solicitud POST a la API para registrar al nuevo usuario
-    return this.http.post(`${this.API_URL}/create`, newUser).pipe(
-      tap((response: any) => {
-        // Guarda el usuario en localStorage
-        localStorage.setItem('user', JSON.stringify(newUser)); // Guarda el nuevo usuario
-        if (response.token) {
-          localStorage.setItem('token', response.token);
+          // Actualizar el estado de autenticación
+          this.currentUser = user;
           this.isAuthenticated.next(true);
+          return true; // Autenticación exitosa
+        } else {
+          return false; // Credenciales incorrectas
         }
       }),
       catchError(error => {
-        console.error('Error durante el registro:', error);
-        return of(null); // Manejo de errores
+        console.error('Error durante el inicio de sesión:', error);
+        return of(false); // Manejo de errores
       })
     );
   }
 
-  // Verifica si el usuario está autenticado
-  verifyUser(email: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.API_URL}/verify`, { email }).pipe(
-      catchError(() => of(false)) // Devuelve false si hay un error
+  // Método para registrar un nuevo usuario
+  register(nombre: string, apellido: string, email: string, contrasenia: string): Observable<boolean> {
+    const newUser = {
+      nombre,
+      apellido,
+      email,
+      contrasenia,
+      numIntercambios: 0, // Inicializar en 0
+      numCapturados: 0    // Inicializar en 0
+    };
+
+    return this.http.post<{ success: boolean, user: any }>(`${this.API_URL}/create`, newUser).pipe(
+      tap(response => {
+        if (response.success) {
+          // Guardar el usuario en localStorage
+          localStorage.setItem('user', JSON.stringify(response.user));
+
+          // Actualizar el estado de autenticación
+          this.currentUser = response.user;
+          this.isAuthenticated.next(true);
+        }
+      }),
+      map(response => response.success),
+      catchError(error => {
+        console.error('Error durante el registro:', error);
+        return of(false);
+      })
     );
   }
 
+  // Método para cerrar sesión
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user'); 
-    this.isAuthenticated.next(false);
+    localStorage.removeItem('user'); // Eliminar el usuario de localStorage
+    this.currentUser = null; // Limpiar el usuario autenticado
+    this.isAuthenticated.next(false); // Actualizar el estado de autenticación
   }
 
+  // Verificar si el usuario está autenticado
   isLoggedIn(): Observable<boolean> {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return of(!!user.email); // Devuelve true si hay un email en localStorage
+    return this.isAuthenticated.asObservable();
+  }
+
+  // Obtener el usuario actual desde el localStorage
+  getCurrentUser(): any {
+    if (!this.currentUser) {
+      const user = localStorage.getItem('user');
+      this.currentUser = user ? JSON.parse(user) : null;
+    }
+    return this.currentUser;
+  }
+
+  // Verificar si hay un usuario en localStorage
+  private checkLocalStorage(): boolean {
+    const user = localStorage.getItem('user');
+    return !!user;
   }
 }
