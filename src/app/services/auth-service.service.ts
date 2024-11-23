@@ -82,7 +82,7 @@ export class AuthServiceService {
   }
 
   // Verificar si hay un usuario en localStorage
-  private checkLocalStorage(): boolean {
+  public checkLocalStorage(): boolean {
     const user = localStorage.getItem('user');
     return !!user;
   }

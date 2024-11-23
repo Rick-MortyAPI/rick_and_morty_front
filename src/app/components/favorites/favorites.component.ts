@@ -80,6 +80,14 @@ export class FavoritesComponent implements OnInit {
     });
   }
 
+  async openCharacterModal(character: any): Promise<void> {
+    const modal = await this.modalController.create({
+      component: PersonajeModalComponent,
+      componentProps: { character },
+    });
+    await modal.present();
+  }
+
   private groupCapturados(capturados: any[]): any[] {
     const grouped = capturados.reduce((acc: any[], curr) => {
       const existing = acc.find((item) => item.idPersonaje === curr.idPersonaje);
