@@ -15,6 +15,8 @@ export class RegisterComponent {
   apellido: string = '';
   email: string = '';
   contrasenia: string = '';
+  isRegistering: boolean = false;
+
 
   constructor(
     private authService: AuthServiceService,
@@ -37,24 +39,28 @@ export class RegisterComponent {
   }
 
   onRegister() {
+    if (this.isRegistering) return; // Si ya se está procesando, no hacer nada
+  
     if (!this.nombre || !this.apellido || !this.email || !this.contrasenia) {
       this.presentToast('Por favor, completa todos los campos.', 'danger');
       return; // Detener la ejecución si hay campos vacíos
     }
-
+  
+    this.isRegistering = true; // Bloquear mientras se procesa el registro
+  
     this.authService.register(this.nombre, this.apellido, this.email, this.contrasenia).subscribe(
       registered => {
-        console.log('Valor recibido en registered:', registered);
         if (registered) {
           this.presentToast('Registro exitoso', 'success');
           this.router.navigate(['/tabs']); // Redirige a las tabs
         } else {
-          this.presentToast('Uusario ya existente', 'danger');
-          console.log("Mierda")
+          this.presentToast('El usuario ya existe o hubo un problema.', 'danger');
         }
       },
       error => {
-        this.presentToast(error.error, 'danger');
+        this.isRegistering = false; // Liberar el bloqueo incluso si ocurre un error
+        this.presentToast('Error al registrarse. Inténtalo de nuevo.', 'danger');
+        console.error('Error en registro:', error);
       }
     );
   }
