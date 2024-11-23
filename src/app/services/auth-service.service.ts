@@ -40,33 +40,24 @@ export class AuthServiceService {
 
   // Método para registrar un nuevo usuario
   register(nombre: string, apellido: string, email: string, contrasenia: string): Observable<boolean> {
-    const newUser = {
-      nombre,
-      apellido,
-      email,
-      contrasenia,
-      numIntercambios: 0, // Inicializar en 0
-      numCapturados: 0    // Inicializar en 0
-    };
+    const newUser = { nombre, apellido, email, contrasenia, numIntercambios: 0, numCapturados: 0 };
 
     return this.http.post<{ success: boolean, user: any }>(`${this.API_URL}/create`, newUser).pipe(
       tap(response => {
-        if (response.success) {
-          // Guardar el usuario en localStorage
-          localStorage.setItem('user', JSON.stringify(response.user));
-
-          // Actualizar el estado de autenticación
-          this.currentUser = response.user;
-          this.isAuthenticated.next(true);
-        }
+        localStorage.setItem('user', JSON.stringify(response));
+        this.isAuthenticated.next(true);
       }),
-      map(response => response.success),
+      map(response => true),
       catchError(error => {
-        console.error('Error durante el registro:', error);
+        console.error('Error al registrar:', error);
+        if (error.status === 409) {
+          console.warn('Usuario ya existe.');
+        }
         return of(false);
       })
     );
   }
+
 
   // Método para cerrar sesión
   logout(): void {
