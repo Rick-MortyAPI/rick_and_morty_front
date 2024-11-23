@@ -44,16 +44,17 @@ export class RegisterComponent {
 
     this.authService.register(this.nombre, this.apellido, this.email, this.contrasenia).subscribe(
       registered => {
+        console.log('Valor recibido en registered:', registered);
         if (registered) {
           this.presentToast('Registro exitoso', 'success');
           this.router.navigate(['/tabs']); // Redirige a las tabs
         } else {
-          this.presentToast('Error durante el registro. Inténtalo de nuevo.', 'danger');
+          this.presentToast('Uusario ya existente', 'danger');
+          console.log("Mierda")
         }
       },
       error => {
-        this.presentToast('Error al registrarse. Inténtalo de nuevo.', 'danger');
-        console.error('Error en registro:', error);
+        this.presentToast(error.error, 'danger');
       }
     );
   }

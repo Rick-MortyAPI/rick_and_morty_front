@@ -45,22 +45,20 @@ export class AuthServiceService {
       apellido,
       email,
       contrasenia,
-      numIntercambios: 0, // Inicializar en 0
-      numCapturados: 0    // Inicializar en 0
+      numIntercambios: 0,
+      numCapturados: 0
     };
 
-    return this.http.post<{ success: boolean, user: any }>(`${this.API_URL}/create`, newUser).pipe(
+    return this.http.post<any>(`${this.API_URL}/create`, newUser).pipe(
       tap(response => {
-        if (response.success) {
-          // Guardar el usuario en localStorage
+        if (response && response.id) {
           localStorage.setItem('user', JSON.stringify(response.user));
-
           // Actualizar el estado de autenticación
           this.currentUser = response.user;
           this.isAuthenticated.next(true);
         }
       }),
-      map(response => response.success),
+      map(response => !!response && !!response.id),
       catchError(error => {
         console.error('Error durante el registro:', error);
         return of(false);
