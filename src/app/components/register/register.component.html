@@ -28,7 +28,7 @@
       <ion-input type="password" [(ngModel)]="contrasenia" required></ion-input>
     </ion-item>
 
-    <ion-button expand="block" class="ion-margin-top" (click)="onRegister()">Registrarse</ion-button>
+    <ion-button expand="block" class="ion-margin-top" [disabled]="isRegistering" (click)="onRegister()">Registrarse</ion-button>
 
     <ion-text color="medium" class="ion-text-center">
       <p>¿Ya tienes cuenta? <a (click)="emitSwitchToLogin()">Inicia sesión aquí</a></p>
