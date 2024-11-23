@@ -20,4 +20,12 @@ export class CapturadoService {
       map((capturados) => capturados.filter((capturado) => capturado.idUsuario === userId))
     );
   }
+
+  getCapturadoById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/get/${id}`);
+  }
+
+  addCapturado(capturado: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/create`, capturado);
+  }
 }

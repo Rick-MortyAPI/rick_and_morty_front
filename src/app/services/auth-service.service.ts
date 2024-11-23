@@ -40,9 +40,10 @@ export class AuthServiceService {
 
   // Método para registrar un nuevo usuario
   register(nombre: string, apellido: string, email: string, contrasenia: string): Observable<boolean> {
+
     const newUser = { nombre, apellido, email, contrasenia, numIntercambios: 0, numCapturados: 0 };
 
-    return this.http.post<{ success: boolean, user: any }>(`${this.API_URL}/create`, newUser).pipe(
+    return this.http.post<any>(`${this.API_URL}/create`, newUser).pipe(
       tap(response => {
         localStorage.setItem('user', JSON.stringify(response));
         this.isAuthenticated.next(true);
@@ -81,7 +82,7 @@ export class AuthServiceService {
   }
 
   // Verificar si hay un usuario en localStorage
-  private checkLocalStorage(): boolean {
+  public checkLocalStorage(): boolean {
     const user = localStorage.getItem('user');
     return !!user;
   }

@@ -50,8 +50,6 @@ export class RegisterComponent {
   
     this.authService.register(this.nombre, this.apellido, this.email, this.contrasenia).subscribe(
       registered => {
-        this.isRegistering = false; // Liberar el bloqueo
-  
         if (registered) {
           this.presentToast('Registro exitoso', 'success');
           this.router.navigate(['/tabs']); // Redirige a las tabs
