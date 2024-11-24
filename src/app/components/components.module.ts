@@ -12,6 +12,9 @@ import { RegisterComponent } from './register/register.component';
 import { SubastaComponent } from './subasta/subasta.component';
 import { CreateSubastaModalComponent } from './subasta/create-subasta-modal/create-subasta-modal.component';
 import { SubastaModalComponent } from './subasta/subasta-modal/subasta-modal.component';
+import { RankingCapturadosModalComponent } from './subasta/ranking-capturados-modal/ranking-capturados-modal.component';
+import { RankingIntercambiosModalComponent } from './subasta/ranking-intercambios-modal/ranking-intercambios-modal.component';
+import { HistorialSubastasModalComponent } from './subasta/historial-subastas-modal/historial-subastas-modal.component';
 
 
 @NgModule({
@@ -25,11 +28,14 @@ import { SubastaModalComponent } from './subasta/subasta-modal/subasta-modal.com
     SubastaModalComponent,
     ScanCodeComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    RankingCapturadosModalComponent,
+    RankingIntercambiosModalComponent,
+    HistorialSubastasModalComponent
   ],
   imports: [
     CommonModule,
-    IonicModule,
+    IonicModule.forRoot(),
     FormsModule
   ],
   exports: [
@@ -42,7 +48,10 @@ import { SubastaModalComponent } from './subasta/subasta-modal/subasta-modal.com
     SubastaComponent,
     ScanCodeComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    RankingCapturadosModalComponent,
+    RankingIntercambiosModalComponent,
+    HistorialSubastasModalComponent
   ]
 })
 export class ComponentsModule { }

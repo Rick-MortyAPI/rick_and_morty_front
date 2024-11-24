@@ -59,6 +59,15 @@ export class AuthServiceService {
     );
   }
 
+  getRankingIntercambios(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/ranking/intercambios`);
+  }
+
+  // Obtener ranking por capturados
+  getRankingCapturados(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/ranking/capturados`);
+  }
+
 
   // Método para cerrar sesión
   logout(): void {

@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { SubastaService } from 'src/app/services/subasta.service';
-import { CreateSubastaModalComponent } from './create-subasta-modal/create-subasta-modal.component';
-import { SubastaModalComponent } from './subasta-modal/subasta-modal.component';
 import { CharactersServiceService } from 'src/app/services/characters-service.service';
+import { CreateSubastaModalComponent } from './create-subasta-modal/create-subasta-modal.component';
+import { RankingCapturadosModalComponent } from './ranking-capturados-modal/ranking-capturados-modal.component';
+import { RankingIntercambiosModalComponent } from './ranking-intercambios-modal/ranking-intercambios-modal.component';
+import { HistorialSubastasModalComponent } from './historial-subastas-modal/historial-subastas-modal.component';
+import { SubastaModalComponent } from './subasta-modal/subasta-modal.component';
+import { CapturadoService } from 'src/app/services/capturado.service';
 
 @Component({
   selector: 'app-subasta',
@@ -12,90 +16,134 @@ import { CharactersServiceService } from 'src/app/services/characters-service.se
 })
 export class SubastaComponent implements OnInit {
   subastas: any[] = [];
+  availableSubastas: any[] = [];
   currentUser: any = null;
 
   constructor(
     private subastaService: SubastaService,
+    private capturadoService: CapturadoService,
     private modalController: ModalController,
-    private characterService: CharactersServiceService
+    private characterService: CharactersServiceService,
+    private toastController: ToastController // Importar ToastController
   ) { }
 
   ngOnInit(): void {
     this.loadCurrentUser();
-    this.loadSubastas();
+    this.subastaService.subastas$.subscribe({
+      next: (data) => {
+        this.subastas = data;
+        this.filterAvailableSubastas();
+        this.loadCharacterDetails();
+      },
+      error: (err) => console.error('Error en la suscripción a subastas:', err),
+    });
+
+    this.reloadSubastas();
   }
 
-  /**
-   * Cargar el usuario autenticado desde localStorage
-   */
   private loadCurrentUser(): void {
     const user = localStorage.getItem('user');
     this.currentUser = user ? JSON.parse(user) : null;
   }
 
-  /**
-   * Cargar subastas desde la API y completar detalles del personaje
-   */
-  loadSubastas(): void {
-    this.subastaService.getAllSubastas().subscribe({
-      next: (data) => {
-        this.subastas = data;
+  async reloadSubastas(): Promise<void> {
+    this.subastaService.loadSubastas();
+    this.filterAvailableSubastas();
+    await this.showToast('Subastas recargadas con éxito'); // Mostrar el toast
+  }
 
-        // Cargar información adicional del personaje para cada subasta
-        this.subastas.forEach((subasta) => {
-          // Asignar información del usuario directamente
-          subasta.usuario = `${subasta.capturado.usuario.nombre} ${subasta.capturado.usuario.apellido}`;
+  private async showToast(message: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000, // Duración del toast en milisegundos
+      position: 'bottom', // Posición del toast
+      color: 'success', // Color del toast
+    });
+    await toast.present();
+  }
 
-          // Obtener detalles del personaje
-          this.characterService.getCharacterById(subasta.capturado.idPersonaje).subscribe({
-            next: (character) => {
-              subasta.personajeName = character.name;
-              subasta.personajeImage = character.image;
-            },
-            error: (err) => {
-              console.error(`Error loading character details for ID ${subasta.capturado.idPersonaje}:`, err);
-              subasta.personajeName = 'Desconocido';
-              subasta.personajeImage = 'assets/placeholder.png'; // Imagen predeterminada
-            },
-          });
-        });
-      },
-      error: (err) => console.error('Error loading subastas:', err),
+  private loadCharacterDetails(): void {
+    this.subastas.forEach((subasta) => {
+      subasta.usuario = `${subasta.capturado.usuario.nombre} ${subasta.capturado.usuario.apellido}`;
+      this.characterService.getCharacterById(subasta.capturado.idPersonaje).subscribe({
+        next: (character) => {
+          subasta.personajeName = character.name;
+          subasta.personajeImage = character.image;
+        },
+        error: (err) => {
+          console.error(`Error loading character details for ID ${subasta.capturado.idPersonaje}:`, err);
+          subasta.personajeName = 'Desconocido';
+          subasta.personajeImage = 'assets/placeholder.png';
+        },
+      });
     });
   }
 
-  /**
-   * Verificar si la subasta pertenece al usuario actual
-   * @param subasta Subasta a verificar
-   * @returns boolean
-   */
-  isOwnSubasta(subasta: any): boolean {
-    return this.currentUser && this.currentUser.id === subasta.capturado.usuario.id;
+  private filterAvailableSubastas(): void {
+    this.availableSubastas = this.subastas.filter(
+      (subasta) => subasta.estado === 'Disponible'
+    );
   }
 
-  /**
-   * Abrir modal para crear una nueva subasta
-   */
   async openCreateSubastaModal(): Promise<void> {
     const modal = await this.modalController.create({
       component: CreateSubastaModalComponent,
     });
 
-    modal.onDidDismiss().then(() => this.loadSubastas());
+    modal.onDidDismiss().then(() => this.reloadSubastas());
     await modal.present();
   }
 
-  /**
-   * Abrir modal para confirmar una subasta
-   * @param subasta Subasta seleccionada
-   */
   async openSubastaModal(subasta: any): Promise<void> {
     const modal = await this.modalController.create({
       component: SubastaModalComponent,
       componentProps: { subasta },
     });
 
-    modal.onDidDismiss().then(() => this.loadSubastas());
+    modal.onDidDismiss().then((result) => {
+      if (result.data && result.data.intercambioRealizado) {
+        this.reloadSubastas(); // Recargar subastas
+        this.updateCapturados(); // Actualizar capturados
+      }
+    });
+
     await modal.present();
+  }
+
+  private updateCapturados(): void {
+    this.capturadoService.loadCapturados(); // Llama al método para recargar los capturados
+  }
+
+  async openRankingIntercambios(): Promise<void> {
+    const modal = await this.modalController.create({
+      component: RankingIntercambiosModalComponent,
+    });
+
+    await modal.present();
+  }
+
+  async openRankingCapturados(): Promise<void> {
+    const modal = await this.modalController.create({
+      component: RankingCapturadosModalComponent,
+    });
+
+    await modal.present();
+  }
+
+  async openHistorialSubastas(): Promise<void> {
+    const modal = await this.modalController.create({
+      component: HistorialSubastasModalComponent,
+      componentProps: { historialSubastas: this.subastas.filter((s) => s.estado === 'Completado') },
+    });
+
+    await modal.present();
+  }
+
+  trackBySubasta(index: number, subasta: any): number {
+    return subasta.id;
+  }
+
+  isOwnSubasta(subasta: any): boolean {
+    return this.currentUser && subasta.capturado.usuario.id === this.currentUser.id;
   }
 }

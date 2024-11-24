@@ -29,8 +29,8 @@
             <ion-label>
               <h2>{{ favorite.name }}</h2>
             </ion-label>
-            <ion-button shape="round" class="boton" (click)="openCharacterModal(favorite)">
-              <ion-icon slot="icon-only" name="eye"></ion-icon>
+            <ion-button slot="end" color="success" (click)="openCharacterModal(favorite)">
+              <ion-icon name="eye"></ion-icon>
             </ion-button>
             <ion-button slot="end" color="danger" (click)="toggleFavorite(favorite)">
               <ion-icon name="trash"></ion-icon>
@@ -51,7 +51,15 @@
   <ng-container *ngIf="viewMode === 'capturados'">
     <ion-card>
       <ion-card-header>
-        <ion-card-title>Capturados</ion-card-title>
+        <ion-toolbar>
+          <ion-card-title>Capturados</ion-card-title>
+          <!-- Botón para recargar capturados -->
+          <ion-buttons slot="end">
+            <ion-button (click)="reloadCapturados()">
+              <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
       </ion-card-header>
       <ion-card-content>
         <ion-list *ngIf="capturados.length > 0; else noCapturados">
@@ -65,7 +73,6 @@
             </ion-label>
           </ion-item>
         </ion-list>
-
         <ng-template #noCapturados>
           <div class="ion-text-center ion-padding">
             <ion-icon name="alert-circle-outline" size="large"></ion-icon>
@@ -76,5 +83,5 @@
     </ion-card>
   </ng-container>
 
-  <ion-toast [message]="toastMessage" [duration]="3000" [isOpen]="isToastOpen"></ion-toast>
+  <ion-toast [message]="toastMessage" [duration]="2000" [isOpen]="isToastOpen"></ion-toast>
 </ion-content>

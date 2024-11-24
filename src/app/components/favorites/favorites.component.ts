@@ -11,7 +11,6 @@ import { CapturadoService } from 'src/app/services/capturado.service';
   styleUrls: ['./favorites.component.scss'],
 })
 export class FavoritesComponent implements OnInit {
-
   viewMode: 'favorites' | 'capturados' = 'favorites'; // Modo de visualización actual
   favorites: any[] = [];
   capturados: any[] = [];
@@ -59,7 +58,7 @@ export class FavoritesComponent implements OnInit {
   private loadCapturados(): void {
     const currentUser = this.getCurrentUser();
     if (!currentUser) return;
-  
+
     this.capturadoService.getCapturadosByUser(currentUser.id).subscribe({
       next: (capturados) => {
         const grouped = this.groupCapturados(capturados);
@@ -69,17 +68,20 @@ export class FavoritesComponent implements OnInit {
             quantity: group.quantity,
           }))
         );
-  
+
         Promise.all(details$)
           .then((results) => {
-            this.capturados = results;
+            this.capturados = results; // Actualizar la lista de capturados
           })
           .catch((err) => console.error('Error loading capturados details:', err));
       },
       error: (err) => console.error('Error loading capturados:', err),
     });
-  
-    this.capturadoService.loadCapturados(); 
+  }
+
+  async reloadCapturados(): Promise<void> {
+    this.loadCapturados();
+    this.showToast('Lista de capturados actualizada.');
   }
 
   async openCharacterModal(character: any): Promise<void> {
@@ -90,8 +92,18 @@ export class FavoritesComponent implements OnInit {
     await modal.present();
   }
 
+  toggleFavorite(favorite: any): void {
+    this.favoritesService.deleteFavorito(favorite.idFavorito).subscribe({
+      next: () => {
+        this.favorites = this.favorites.filter((fav) => fav.idFavorito !== favorite.idFavorito);
+        this.showToast(`${favorite.name} eliminado de favoritos.`);
+      },
+      error: (err) => console.error('Error removing favorite:', err),
+    });
+  }
+
   private groupCapturados(capturados: any[]): any[] {
-    const grouped = capturados.reduce((acc: any[], curr) => {
+    return capturados.reduce((acc: any[], curr) => {
       const existing = acc.find((item) => item.idPersonaje === curr.idPersonaje);
       if (existing) {
         existing.quantity++;
@@ -100,19 +112,6 @@ export class FavoritesComponent implements OnInit {
       }
       return acc;
     }, []);
-    return grouped;
-  }
-
-  toggleFavorite(favorite: any): void {
-    this.favoritesService.deleteFavorito(favorite.idFavorito).subscribe({
-      next: () => {
-        this.favorites = this.favorites.filter((fav) => fav.idFavorito !== favorite.idFavorito);
-        this.showToast(`${favorite.name} eliminado de favoritos.`);
-      },
-      error: (err) => {
-        console.error('Error removing favorite:', err);
-      },
-    });
   }
 
   private getCurrentUser(): any {
@@ -127,5 +126,4 @@ export class FavoritesComponent implements OnInit {
       this.isToastOpen = false;
     }, 3000);
   }
-  
 }

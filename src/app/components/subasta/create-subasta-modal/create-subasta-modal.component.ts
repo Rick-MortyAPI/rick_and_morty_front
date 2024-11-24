@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
+import { forkJoin, map } from 'rxjs';
 import { CapturadoService } from 'src/app/services/capturado.service';
 import { CharactersServiceService } from 'src/app/services/characters-service.service';
 import { SubastaService } from 'src/app/services/subasta.service';
@@ -57,38 +58,58 @@ export class CreateSubastaModalComponent implements OnInit {
 
     this.capturadoService.getCapturadosByUser(currentUser.id).subscribe({
       next: (capturados) => {
-        const capturadosWithDetails = capturados.map((capturado: any) =>
-          this.charactersService.getCharacterById(capturado.idPersonaje).toPromise().then((character) => ({
-            id: capturado.id,
-            nombrePersonaje: character.name,
-            imagen: character.image,
-          }))
+        if (!capturados || capturados.length === 0) {
+          console.warn('No se encontraron personajes capturados para el usuario.');
+          this.personajesCapturados = [];
+          return;
+        }
+
+        // Solicitar los detalles de cada personaje capturado
+        const capturadosRequests = capturados.map((capturado: any) =>
+          this.charactersService.getCharacterById(capturado.idPersonaje).pipe(
+            map((character) => ({
+              id: capturado.id,
+              nombrePersonaje: character.name || 'Desconocido',
+              imagen: character.image || 'assets/placeholder.png',
+            }))
+          )
         );
 
-        Promise.all(capturadosWithDetails)
-          .then((results) => {
+        // Ejecuta todas las solicitudes en paralelo
+        forkJoin(capturadosRequests).subscribe({
+          next: (results) => {
             this.personajesCapturados = results;
-          })
-          .catch((err) => console.error('Error loading character details:', err));
+            console.log('Personajes capturados cargados:', this.personajesCapturados);
+          },
+          error: (err) => {
+            console.error('Error al cargar los detalles de los personajes:', err);
+          },
+        });
       },
-      error: (err) => console.error('Error loading capturados:', err),
+      error: (err) => {
+        console.error('Error al cargar capturados:', err);
+      },
     });
   }
 
+
   /**
-   * Cargar IDs de personajes ya subastados
+   * Cargar IDs de personajes ya subastados con estado "Disponible"
    */
   private loadSubastados(): void {
-    this.subastaService.getAllSubastas().subscribe({
+    this.subastaService.subastas$.subscribe({
       next: (subastas) => {
-        this.personajesSubastadosIds = subastas.map((subasta) => subasta.idCapturado);
+        // Filtrar subastas con estado "Disponible"
+        this.personajesSubastadosIds = subastas
+          .filter((subasta) => subasta.estado === 'Disponible')
+          .map((subasta) => subasta.idCapturado);
       },
       error: (err) => console.error('Error loading subastas:', err),
     });
   }
 
   /**
-   * Verificar si un personaje ya está subastado
+   * Verificar si un personaje ya está subastado con estado "Disponible"
    */
   isSubastado(capturadoId: number): boolean {
     return this.personajesSubastadosIds.includes(capturadoId);
