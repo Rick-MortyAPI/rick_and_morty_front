@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Barcode, BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController, ToastController } from '@ionic/angular';
 import { FoundServiceService } from 'src/app/services/found-service.service';
 import { HttpClient } from '@angular/common/http';
 import { Geolocation } from '@capacitor/geolocation';
 import { PersonajeModalComponent } from '../personaje-modal/personaje-modal.component';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Observable } from 'rxjs';
+import { CharactersServiceService } from 'src/app/services/characters-service.service';
+import { CapturadoService } from '../../services/capturado.service';
 
 
 @Component({
@@ -14,7 +17,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   styleUrls: ['./scan-code.component.scss'],
 })
 export class ScanCodeComponent implements OnInit {
+
+  private readonly baseUrl = 'https://rickandmortyapi.com/api/character';
   characters: any[] = [];
+  capturados:  { [id: number]: any } = {};
   isSupported = false;
   barcodes: Barcode[] = [];
   location: { latitude: number; longitude: number } | undefined;
@@ -25,7 +31,10 @@ export class ScanCodeComponent implements OnInit {
     private foundService: FoundServiceService,
     private modalController: ModalController,
     private http: HttpClient,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private characterServ: CharactersServiceService,
+    private capturadoSer: CapturadoService,
+    private toastController: ToastController,
   ) {}
 
   ngOnInit() {
@@ -34,18 +43,38 @@ export class ScanCodeComponent implements OnInit {
       this.isSupported = result.supported;
     });
     
-    this.foundService.found$.subscribe(found => {
+    this.foundService.found$.subscribe((found) => {
       this.characters = found;
+  
+      // Carga los datos de cada personaje al inicializar
+      this.characters.forEach((character) => {
+        this.getPersonajes(character.idPersonaje);
+      });
     });
     
   }
 
+  getPersonajes(id: number): void {
+    // Verifica si ya cargaste los datos para evitar múltiples solicitudes
+    if (!this.capturados[id]) {
+      this.characterServ.getCharacterById(id).subscribe({
+        next: (character) => {
+          this.capturados[id] = character; // Almacena los datos del personaje
+        },
+        error: (err) => {
+          console.error(`Error loading character details for ID ${id}:`, err);
+        },
+      });
+    }
+  }
+
   getMapUrl(character: any): SafeResourceUrl {
-    const lng = character.ubicacion.lng;
-    const lat = character.ubicacion.lat;
-    const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
+
+    const lng = character.longitud;
+    const lat = character.latitud;
+    const bbox = `${lng},${lat},${lng},${lat}`;
     const url = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
-    
+
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
@@ -88,38 +117,33 @@ export class ScanCodeComponent implements OnInit {
     await alert.present();
   }
 
-
   private fetchCharacterData(endpoint: string): void {
 
     this.http.get(endpoint).subscribe(
       async (character: any) => {
 
-        if (this.foundService.isFound(character.id)) {
-          const alert = await this.alertController.create({
-            header: 'Personaje ya encontrado',
-            message: 'El personaje ya está en tu lista.',
-            buttons: ['OK'],
-          });
-          await alert.present();
-          return;
-        }
-
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
         await this.getLocation();
 
-        character.ubicacion = {
-          lat: this.location?.latitude,
-          lng: this.location?.longitude
+        const captura = {
+          "latitud": this.location?.latitude,
+          "longitud": this.location?.longitude,
+          "idPersonaje": character.id,
+          "idUsuario": user.id
         };
 
+        this.capturadoSer.addCapturado(captura).subscribe(
+          response => {
+            console.log('Captura realizada:', response);
+            this.presentToast(`${character.name} capturado correctamente!`, 'success');
+          },
+          error => {
+            console.log(error);
+            this.presentToast('Error al capturar personaje', 'danger');
+          }
+        );
+
         this.foundService.addFound(character);
-
-        const successAlert = await this.alertController.create({
-          header: 'Personaje Encontrado',
-          message: `Se encontró al personaje: ${character.name}`,
-          buttons: ['OK'],
-        });
-
-        await successAlert.present();
 
       },
       (error) => {
@@ -154,5 +178,15 @@ export class ScanCodeComponent implements OnInit {
       }
     });
     return await modal.present();
+  }
+
+  async presentToast(message: string, color: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'top'
+    });
+    await toast.present();
   }
 }

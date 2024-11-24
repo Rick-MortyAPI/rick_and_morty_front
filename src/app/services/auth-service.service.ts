@@ -8,8 +8,8 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 })
 export class AuthServiceService {
   private isAuthenticated = new BehaviorSubject<boolean>(this.checkLocalStorage());
-  private readonly API_URL: string = "http://rickandmortyback-production-40ec.up.railway.app/api/usuarios";
-  private currentUser: any = null; // Almacenar el usuario autenticado
+  private readonly API_URL: string = "https://rick-and-morty-back-7o08.onrender.com/api/usuarios";
+  private currentUser: any = null;
 
   constructor(private http: HttpClient) { }
 
@@ -40,9 +40,10 @@ export class AuthServiceService {
 
   // Método para registrar un nuevo usuario
   register(nombre: string, apellido: string, email: string, contrasenia: string): Observable<boolean> {
+
     const newUser = { nombre, apellido, email, contrasenia, numIntercambios: 0, numCapturados: 0 };
 
-    return this.http.post<{ success: boolean, user: any }>(`${this.API_URL}/create`, newUser).pipe(
+    return this.http.post<any>(`${this.API_URL}/create`, newUser).pipe(
       tap(response => {
         localStorage.setItem('user', JSON.stringify(response));
         this.isAuthenticated.next(true);
@@ -81,7 +82,7 @@ export class AuthServiceService {
   }
 
   // Verificar si hay un usuario en localStorage
-  private checkLocalStorage(): boolean {
+  public checkLocalStorage(): boolean {
     const user = localStorage.getItem('user');
     return !!user;
   }

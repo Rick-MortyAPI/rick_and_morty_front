@@ -6,7 +6,7 @@ import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class FavoritesServiceService {
-  private readonly API_URL = 'http://localhost:3000/api/favoritos';
+  private readonly API_URL = 'https://rick-and-morty-back-7o08.onrender.com/api/favoritos';
 
   private favoritesSubject = new BehaviorSubject<any[]>([]);
   public favorites$ = this.favoritesSubject.asObservable();
