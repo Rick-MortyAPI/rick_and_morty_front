@@ -59,7 +59,7 @@ export class FavoritesComponent implements OnInit {
   private loadCapturados(): void {
     const currentUser = this.getCurrentUser();
     if (!currentUser) return;
-
+  
     this.capturadoService.getCapturadosByUser(currentUser.id).subscribe({
       next: (capturados) => {
         const grouped = this.groupCapturados(capturados);
@@ -69,7 +69,7 @@ export class FavoritesComponent implements OnInit {
             quantity: group.quantity,
           }))
         );
-
+  
         Promise.all(details$)
           .then((results) => {
             this.capturados = results;
@@ -78,6 +78,8 @@ export class FavoritesComponent implements OnInit {
       },
       error: (err) => console.error('Error loading capturados:', err),
     });
+  
+    this.capturadoService.loadCapturados(); 
   }
 
   async openCharacterModal(character: any): Promise<void> {
