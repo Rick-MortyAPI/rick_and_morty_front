@@ -14,14 +14,13 @@
 </ion-header>
 
 <ion-content fullscreen>
-  <div class="flex flex-col h-full">
-    <!-- Contenedor general -->
-    <div *ngIf="viewMode === 'favorites'" class="flex-1 overflow-auto p-4">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Favoritos</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
+  <div *ngIf="viewMode === 'favorites'" class="p-4">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Favoritos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="scrollable-list">
           <ion-list *ngIf="favorites.length > 0; else noFavorites">
             <ion-item *ngFor="let favorite of favorites">
               <ion-thumbnail slot="start">
@@ -38,22 +37,25 @@
               </ion-button>
             </ion-item>
           </ion-list>
-          <ng-template #noFavorites>
-            <div class="ion-text-center ion-padding">
-              <ion-icon name="sad-outline" size="large"></ion-icon>
-              <p>No tienes personajes favoritos.</p>
-            </div>
-          </ng-template>
-        </ion-card-content>
-      </ion-card>
-    </div>
+        </div>
+        <ng-template #noFavorites>
+          <div class="ion-text-center ion-padding">
+            <ion-icon name="sad-outline" size="large"></ion-icon>
+            <p>No tienes personajes favoritos.</p>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
-    <div *ngIf="viewMode === 'capturados'" class="flex-1 overflow-auto p-4">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Capturados</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
+  <div *ngIf="viewMode === 'capturados'" class="p-4">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Capturados</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Contenedor con scroll -->
+        <div class="scrollable-list">
           <ion-list *ngIf="capturados.length > 0; else noCapturados">
             <ion-item *ngFor="let capturado of capturados">
               <ion-thumbnail slot="start">
@@ -65,14 +67,15 @@
               </ion-label>
             </ion-item>
           </ion-list>
-          <ng-template #noCapturados>
-            <div class="ion-text-center ion-padding">
-              <ion-icon name="alert-circle-outline" size="large"></ion-icon>
-              <p>No tienes personajes capturados.</p>
-            </div>
-          </ng-template>
-        </ion-card-content>
-      </ion-card>
-    </div>
+        </div>
+        <ng-template #noCapturados>
+          <div class="ion-text-center ion-padding">
+            <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+            <p>No tienes personajes capturados.</p>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
   </div>
+
 </ion-content>
