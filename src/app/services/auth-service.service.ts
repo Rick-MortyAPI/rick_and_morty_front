@@ -8,8 +8,8 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 })
 export class AuthServiceService {
   private isAuthenticated = new BehaviorSubject<boolean>(this.checkLocalStorage());
-  private readonly API_URL: string = "http://localhost:3000/api/usuarios";
-  private currentUser: any = null; // Almacenar el usuario autenticado
+  private readonly API_URL: string = "https://rick-and-morty-back-7o08.onrender.com/api/usuarios";
+  private currentUser: any = null;
 
   constructor(private http: HttpClient) { }
 

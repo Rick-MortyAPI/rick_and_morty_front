@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SubastaService {
-  private readonly API_URL = 'http://localhost:3000/api/subastas';
+  private readonly API_URL = 'https://rick-and-morty-back-7o08.onrender.com/api/subastas';
 
   constructor(private http: HttpClient) { }
 
