@@ -7,7 +7,7 @@ import { map, Observable } from 'rxjs';
 })
 export class CapturadoService {
 
-  private readonly API_URL = 'http://localhost:3000/api/capturados';
+  private readonly API_URL = 'https://rick-and-morty-back-7o08.onrender.com/api/capturados';
 
   constructor(private http: HttpClient) { }
 
