@@ -33,7 +33,6 @@ export class CapturadoService {
   getCapturadosByUser(userId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.API_URL}/getAll`).pipe(
       map((capturados) => {
-        console.log('Todos los capturados:', capturados);
         return capturados.filter((capturado) => capturado.idUsuario === userId);
       }),
       catchError((error) => {
