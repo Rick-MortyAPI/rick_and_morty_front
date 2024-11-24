@@ -6,7 +6,6 @@ import { HttpClient } from '@angular/common/http';
 import { Geolocation } from '@capacitor/geolocation';
 import { PersonajeModalComponent } from '../personaje-modal/personaje-modal.component';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Observable } from 'rxjs';
 import { CharactersServiceService } from 'src/app/services/characters-service.service';
 import { CapturadoService } from '../../services/capturado.service';
 
@@ -18,7 +17,6 @@ import { CapturadoService } from '../../services/capturado.service';
 })
 export class ScanCodeComponent implements OnInit {
 
-  private readonly baseUrl = 'https://rickandmortyapi.com/api/character';
   characters: any[] = [];
   capturados:  { [id: number]: any } = {};
   isSupported = false;
@@ -135,6 +133,9 @@ export class ScanCodeComponent implements OnInit {
         this.capturadoSer.addCapturado(captura).subscribe(
           response => {
             console.log('Captura realizada:', response);
+            this.foundService.addFound(character);
+            this.foundService.loadFound();
+
             this.presentToast(`${character.name} capturado correctamente!`, 'success');
           },
           error => {
@@ -142,8 +143,6 @@ export class ScanCodeComponent implements OnInit {
             this.presentToast('Error al capturar personaje', 'danger');
           }
         );
-
-        this.foundService.addFound(character);
 
       },
       (error) => {

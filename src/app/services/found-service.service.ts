@@ -21,7 +21,7 @@ export class FoundServiceService {
     });
   }
 
-  private async loadFound(): Promise<any[]> {
+  public async loadFound(): Promise<any[]> {
     try {
       // Obtener el JSON del usuario desde localStorage
       const userString = localStorage.getItem('user');
