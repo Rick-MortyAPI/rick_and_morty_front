@@ -41,10 +41,12 @@ export class ScanCodeComponent implements OnInit {
       this.isSupported = result.supported;
     });
     
-    this.foundService.found$.subscribe((found) => {
-      this.characters = found;
-  
-      // Carga los datos de cada personaje al inicializar
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    this.capturadoSer.getCapturadosByUser(user.id).subscribe((capturados) => {
+      this.characters = capturados;
+
+      // Cargar detalles de los personajes si es necesario
       this.characters.forEach((character) => {
         this.getPersonajes(character.idPersonaje);
       });
@@ -116,45 +118,50 @@ export class ScanCodeComponent implements OnInit {
   }
 
   private fetchCharacterData(endpoint: string): void {
-
     this.http.get(endpoint).subscribe(
       async (character: any) => {
-
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         await this.getLocation();
 
         const captura = {
-          "latitud": this.location?.latitude,
-          "longitud": this.location?.longitude,
-          "idPersonaje": character.id,
-          "idUsuario": user.id
+          latitud: this.location?.latitude,
+          longitud: this.location?.longitude,
+          idPersonaje: character.id,
+          idUsuario: user.id,
         };
 
         this.capturadoSer.addCapturado(captura).subscribe(
-          response => {
-            console.log('Captura realizada:', response);
-            this.foundService.addFound(character);
-            this.foundService.loadFound();
-
+          () => {
             this.presentToast(`${character.name} capturado correctamente!`, 'success');
+
+            // Recargar capturados desde el backend
+            this.capturadoSer.loadCapturados();
+
+            // Actualizar la lista local
+            this.capturadoSer.getCapturadosByUser(user.id).subscribe((capturados) => {
+              this.characters = capturados;
+
+              // Opcional: cargar detalles de los personajes
+              this.characters.forEach((char) => this.getPersonajes(char.idPersonaje));
+            });
           },
-          error => {
-            console.log(error);
+          (error) => {
+            console.error('Error al capturar personaje:', error);
             this.presentToast('Error al capturar personaje', 'danger');
           }
         );
-
       },
       (error) => {
-        console.error("Error fetching character data:", error);
+        console.error('Error fetching character data:', error);
         this.alertController.create({
           header: 'Error',
           message: 'No se pudo obtener los datos del personaje.',
           buttons: ['OK'],
-        }).then(alert => alert.present());
+        }).then((alert) => alert.present());
       }
     );
   }
+
 
   private async getLocation(): Promise<void> {
     try {
