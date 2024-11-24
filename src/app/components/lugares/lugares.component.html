@@ -38,11 +38,11 @@
                     <p>{{ resident.species }} - {{ resident.status }}</p>
                   </ion-label>
 
-                  <ion-button shape="round" class="boton" (click)="openCharacterModal(resident)">
+                  <ion-button shape="round" color="success" class="boton" (click)="openCharacterModal(resident)">
                     <ion-icon slot="icon-only" name="eye"></ion-icon>
                   </ion-button>
           
-                  <ion-button shape="round" class="boton" id="open-toast" (click)="toggleFavorite(resident)">
+                  <ion-button shape="round" color="warning" class="boton" id="open-toast" (click)="toggleFavorite(resident)">
                     <ion-icon slot="icon-only" [name]="isFavorite(resident) ? 'star' : 'star-outline'"></ion-icon>
                   </ion-button>
 
