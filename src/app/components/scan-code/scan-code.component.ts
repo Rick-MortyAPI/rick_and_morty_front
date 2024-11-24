@@ -21,12 +21,10 @@ export class ScanCodeComponent implements OnInit {
   capturados:  { [id: number]: any } = {};
   isSupported = false;
   barcodes: Barcode[] = [];
-  location: { latitude: number; longitude: number } | undefined;
   mapUrl: SafeResourceUrl | undefined;
 
   constructor(
     private alertController: AlertController,
-    private foundService: FoundServiceService,
     private modalController: ModalController,
     private http: HttpClient,
     private sanitizer: DomSanitizer,
@@ -121,11 +119,12 @@ export class ScanCodeComponent implements OnInit {
     this.http.get(endpoint).subscribe(
       async (character: any) => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        await this.getLocation();
+        
+        const position = await Geolocation.getCurrentPosition(); 
 
         const captura = {
-          latitud: this.location?.latitude,
-          longitud: this.location?.longitude,
+          latitud: position.coords.latitude,
+          longitud: position.coords.longitude,
           idPersonaje: character.id,
           idUsuario: user.id,
         };
@@ -160,20 +159,6 @@ export class ScanCodeComponent implements OnInit {
         }).then((alert) => alert.present());
       }
     );
-  }
-
-
-  private async getLocation(): Promise<void> {
-    try {
-      const position = await Geolocation.getCurrentPosition(); 
-      this.location = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      };
-    } catch (error) {
-      console.error("Error getting location:", error);
-      this.location = undefined;
-    }
   }
 
   async openCharacterModal(character: any) {
