@@ -8,7 +8,7 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 })
 export class AuthServiceService {
   private isAuthenticated = new BehaviorSubject<boolean>(this.checkLocalStorage());
-  private readonly API_URL: string = "http://localhost:3000/api/usuarios";
+  private readonly API_URL: string = "http://rickandmortyback-production-40ec.up.railway.app/api/usuarios";
   private currentUser: any = null; // Almacenar el usuario autenticado
 
   constructor(private http: HttpClient) { }

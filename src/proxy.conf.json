@@ -1,0 +1,8 @@
+{
+    "/api": {
+      "target": "http://rickandmortyback-production-40ec.up.railway.app",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }
+  
