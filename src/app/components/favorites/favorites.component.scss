@@ -1,19 +1,27 @@
-
-.card{
+.card {
     border-radius: 12px;
     padding: 10px;
 }
 
-.items{
+.items {
     display: flex;
     margin-bottom: 18px;
 }
 
-.boton{
+.boton {
     width: 17px;
 }
 
-img{
+img {
     width: 100%;
     border-radius: 100%;
+}
+
+.scrollable-list {
+    max-height: 400px;
+    /* Ajusta la altura máxima para el contenedor */
+    overflow-y: auto;
+    /* Habilita el scroll vertical */
+    padding-right: 4px;
+    /* Espacio para evitar que el scroll cubra el contenido */
 }
