@@ -50,11 +50,15 @@
 
   <div *ngIf="viewMode === 'capturados'" class="p-4">
     <ion-card>
-      <ion-card-header>
-        <ion-card-title>Capturados</ion-card-title>
+      <ion-card-header class="card-header">
+        <div class="header-content">
+          <ion-card-title>Capturados</ion-card-title>
+          <ion-button size="small" fill="clear" color="primary" (click)="reloadCapturados()">
+            <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+          </ion-button>
+        </div>
       </ion-card-header>
       <ion-card-content>
-        <!-- Contenedor con scroll -->
         <div class="scrollable-list">
           <ion-list *ngIf="capturados.length > 0; else noCapturados">
             <ion-item *ngFor="let capturado of capturados">
@@ -77,5 +81,4 @@
       </ion-card-content>
     </ion-card>
   </div>
-
 </ion-content>
