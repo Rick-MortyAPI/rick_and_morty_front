@@ -31,32 +31,33 @@
 
 <ion-content>
   <!-- Lista de subastas disponibles -->
-  <ion-list *ngIf="availableSubastas.length > 0; else noSubastas">
-    <ion-item *ngFor="let subasta of availableSubastas; trackBy: trackBySubasta" lines="full">
-      <ion-thumbnail slot="start">
-        <img [src]="subasta.personajeImage" alt="{{ subasta.personajeName }}">
-      </ion-thumbnail>
-
-      <ion-label>
-        <h2 class="subasta-title">{{ subasta.personajeName }}</h2>
-        <p class="subasta-details">Usuario: {{ subasta.usuario }}</p>
-        <p class="subasta-details">Estado: <strong>{{ subasta.estado }}</strong></p>
-        <p class="subasta-details">Inicio: {{ subasta.horaInicial | date: 'short' }}</p>
-        <p class="subasta-details">Fin: {{ subasta.horaFinal | date: 'short' }}</p>
-      </ion-label>
-
-      <ion-buttons slot="end">
-        <!-- Mostrar botón sólo si no es la propia subasta -->
-        <ion-button *ngIf="!isOwnSubasta(subasta)" (click)="openSubastaModal(subasta)" color="success">
-          Intercambiar
-        </ion-button>
-        <ion-button *ngIf="isOwnSubasta(subasta)" disabled color="medium">
-          Mi Subasta
-        </ion-button>
-      </ion-buttons>
-    </ion-item>
-  </ion-list>
-
+   <div class="scrollable-list">
+     <ion-list *ngIf="availableSubastas.length > 0; else noSubastas">
+       <ion-item *ngFor="let subasta of availableSubastas; trackBy: trackBySubasta" lines="full">
+         <ion-thumbnail slot="start">
+           <img [src]="subasta.personajeImage" alt="{{ subasta.personajeName }}">
+         </ion-thumbnail>
+   
+         <ion-label>
+           <h2 class="subasta-title">{{ subasta.personajeName }}</h2>
+           <p class="subasta-details">Usuario: {{ subasta.usuario }}</p>
+           <p class="subasta-details">Estado: <strong>{{ subasta.estado }}</strong></p>
+           <p class="subasta-details">Inicio: {{ subasta.horaInicial | date: 'short' }}</p>
+           <p class="subasta-details">Fin: {{ subasta.horaFinal | date: 'short' }}</p>
+         </ion-label>
+   
+         <ion-buttons slot="end">
+           <!-- Mostrar botón sólo si no es la propia subasta -->
+           <ion-button *ngIf="!isOwnSubasta(subasta)" (click)="openSubastaModal(subasta)" color="success">
+             Intercambiar
+           </ion-button>
+           <ion-button *ngIf="isOwnSubasta(subasta)" disabled color="medium">
+             Mi Subasta
+           </ion-button>
+         </ion-buttons>
+       </ion-item>
+     </ion-list>
+   </div>
 
   <!-- Placeholder para cuando no hay subastas disponibles -->
   <ng-template #noSubastas>
