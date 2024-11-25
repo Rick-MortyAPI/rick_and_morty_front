@@ -18,3 +18,14 @@
     filter: grayscale(100%);
     /* Cambiar a escala de grises */
 }
+
+
+.scrollable-list {
+    max-height: 450px;
+    /* Ajusta la altura máxima para el contenedor */
+    overflow-y: auto;
+    /* Habilita el scroll vertical */
+    padding-right: 4px;
+    /* Espacio para evitar que el scroll cubra el contenido */
+}
+
